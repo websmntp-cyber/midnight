@@ -1,0 +1,2328 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0C2B20">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<meta name="referrer" content="no-referrer">
+<title>Dashboard Admin Gol Arena</title>
+<script src="/assets/dc-lite.js"></script>
+<script src="/assets/jsqr.js"></script>
+<meta name="robots" content="noindex,nofollow">
+</head>
+<body>
+<template id="dc-tpl">
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+.btn:hover{filter:brightness(0.93)}
+.row:hover{border-color:#0C2B20 !important}
+.nav-link:hover{background:#133A2B}
+button{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #2E9B63;outline-offset:2px}
+</style>
+</helmet>
+<div id="top" style="width:100%;font-family:'Barlow',system-ui,sans-serif;color:#10261C;background:#F3F1EA">
+
+<!-- TOP BAR -->
+<header style="background:#0C2B20;color:#F3F5EE">
+<div style="max-width:1200px;margin:0 auto;padding:14px 24px;box-sizing:border-box;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+<div style="display:flex;align-items:center;gap:12px">
+<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+<rect width="40" height="40" rx="10" fill="{{accent}}"/>
+<g fill="none" stroke="#0C2B20" stroke-width="2.2" stroke-linejoin="round">
+<rect x="8" y="11" width="24" height="18" rx="2"/>
+<line x1="20" y1="11" x2="20" y2="29"/>
+<circle cx="20" cy="20" r="4"/>
+</g>
+</svg>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;letter-spacing:0.04em;text-transform:uppercase;line-height:1">{{ brandName }}</span>
+<span style="padding:4px 12px;border-radius:999px;border:1.5px solid #5E8C75;font-weight:600;font-size:13px;letter-spacing:0.08em;text-transform:uppercase">Admin</span>
+</div>
+<nav aria-label="Menu admin" style="display:flex;gap:8px;white-space:nowrap;overflow-x:auto">
+<sc-for list="{{ navItems }}" as="item" hint-placeholder-count="4">
+<button type="button" class="nav-link" onClick="{{ item.go }}" aria-current="{{ item.current }}" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;box-sizing:border-box;padding:0 16px;border:none;border-radius:999px;font-family:inherit;font-weight:600;font-size:16px;cursor:pointer;{{ item.css }}">
+<span>{{ item.label }}</span>
+<sc-if value="{{ item.hasBadge }}" hint-placeholder-val="{{ false }}">
+<span style="min-width:22px;height:22px;box-sizing:border-box;padding:0 6px;border-radius:999px;background:{{accent}};color:#0C2B20;font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">{{ item.badge }}</span>
+</sc-if>
+</button>
+</sc-for>
+</nav>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px">
+<a href="/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:44px;font-weight:500;font-size:15px;text-decoration:underline">Lihat tampilan pelanggan</a>
+<div style="position:relative">
+<button type="button" onClick="{{ toggleNotif }}" aria-expanded="{{ notifOpen }}" aria-label="{{ bellLabel }}" style="position:relative;width:48px;height:48px;border-radius:50%;border:1.5px solid #5E8C75;background:transparent;color:#F3F5EE;display:inline-flex;align-items:center;justify-content:center;cursor:pointer">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+<sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}">
+<span style="position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;box-sizing:border-box;padding:0 6px;border-radius:999px;background:{{accent}};color:#0C2B20;font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center">{{ unreadCount }}</span>
+</sc-if>
+</button>
+<sc-if value="{{ notifOpen }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-label="Notifikasi" style="position:fixed;left:{{ notifLeft }}px;top:{{ notifTop }}px;z-index:30;width:{{ notifW }}px;background:#FFFFFF;color:#10261C;border:1px solid #D9D6CB;border-radius:16px;box-shadow:0 12px 32px rgba(12,43,32,0.22);overflow:hidden">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px">
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:0.02em;text-transform:uppercase">Notifikasi</span>
+<button type="button" onClick="{{ readAll }}" style="min-height:44px;padding:0 4px;border:none;background:transparent;color:#1F6B45;font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer">Tandai semua dibaca</button>
+</div>
+<sc-if value="{{ noNotifs }}" hint-placeholder-val="{{ true }}">
+<p style="margin:0;padding:16px;border-top:1px solid #E4E1D8;font-size:15px;line-height:1.5;color:#3F5247">Belum ada notifikasi. Transfer dan pembatalan dari pelanggan akan muncul di sini.</p>
+</sc-if>
+<sc-for list="{{ notifs }}" as="n" hint-placeholder-count="3">
+<button type="button" onClick="{{ n.view }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;box-sizing:border-box;padding:14px 16px;border:none;border-top:1px solid #E4E1D8;background:#FFFFFF;color:#10261C;text-align:left;font-family:inherit;cursor:pointer">
+<span style="font-weight:700;font-size:15px">{{ n.title }}</span>
+<span style="font-size:14px;color:#3F5247">{{ n.detail }}</span>
+<span style="font-size:13px;color:#4D5F55">{{ n.ago }}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+<span style="width:44px;height:44px;border-radius:50%;background:#133A2B;color:#F3F5EE;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:16px" aria-label="Akun admin">A</span>
+</div>
+</div>
+</header>
+
+<main style="max-width:1200px;margin:0 auto;padding:40px 24px 64px;box-sizing:border-box;display:flex;flex-direction:column;gap:28px">
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<h1 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(36px,5vw,52px);line-height:1;text-transform:uppercase">{{ pageTitle }}</h1>
+<p style="margin:0;font-size:17px;color:#3F5247">{{ pageSub }}</p>
+</div>
+
+<sc-if value="{{ hasSyncMsg }}" hint-placeholder-val="{{ false }}">
+<p role="alert" style="margin:0;padding:14px 16px;border-radius:12px;background:#FAD4D0;color:#7A1E16;font-size:15px;line-height:1.5">{{ syncMsg }}</p>
+</sc-if>
+
+<sc-if value="{{ showBanner }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="background:#0C2B20;color:#F3F5EE;border-radius:16px;padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px">
+<div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1 1 320px">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:0 0 auto"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:700;font-size:17px;color:{{accent}}">{{ bannerTitle }}</span>
+<span style="font-size:15px;color:#E3ECE5">{{ bannerText }}</span>
+</div>
+</div>
+<div style="display:flex;gap:8px">
+<button type="button" class="btn" onClick="{{ viewBanner }}" style="min-height:44px;padding:0 20px;border:none;border-radius:999px;background:{{accent}};color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Lihat</button>
+<button type="button" onClick="{{ closeBanner }}" style="min-height:44px;padding:0 16px;border:1.5px solid #5E8C75;border-radius:999px;background:transparent;color:#F3F5EE;font-weight:600;font-size:15px;cursor:pointer">Tutup</button>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ TAB BOOKING ============ -->
+<sc-if value="{{ showBooking }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:28px">
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Booking aktif</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ statActive }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Perlu verifikasi</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ statVerify }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Menunggu transfer</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ statWait }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#0C2B20;color:#F3F5EE;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#C3D2C8">DP terverifikasi</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,3.3vw,40px);white-space:nowrap;line-height:1;color:{{accent}}">{{ statDp }}</span>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+
+<section aria-label="Daftar booking" style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+<div role="group" aria-label="Filter status" style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ tabs }}" as="tab" hint-placeholder-count="4">
+<button type="button" onClick="{{ tab.pick }}" aria-pressed="{{ tab.pressed }}" style="min-height:44px;box-sizing:border-box;padding:0 18px;border-width:1.5px;border-style:solid;border-radius:999px;font-weight:600;font-size:15px;cursor:pointer;{{ tab.css }}">{{ tab.label }} ({{ tab.count }})</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;flex:1 1 240px;max-width:360px">
+<label for="cari-booking" style="font-weight:600;font-size:15px">Cari kode atau nama</label>
+<input id="cari-booking" type="search" value="{{ query }}" onChange="{{ onQuery }}" placeholder="Contoh: GA-4F7K2" style="min-height:48px;box-sizing:border-box;padding:0 14px;border:1.5px solid #7C897F;border-radius:10px;font-family:inherit;font-size:16px;color:#10261C;background:#FFFFFF">
+</div>
+</div>
+<div style="overflow-x:auto">
+<div style="min-width:680px;display:flex;flex-direction:column;gap:8px">
+<div style="display:grid;grid-template-columns:1.5fr 1.7fr 1fr 1.3fr;gap:16px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4D5F55">
+<span>Pemesan</span>
+<span>Lapangan dan jadwal</span>
+<span>Pembayaran</span>
+<span>Status</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+<button type="button" class="row" onClick="{{ r.pick }}" aria-pressed="{{ r.pressed }}" style="display:grid;grid-template-columns:1.5fr 1.7fr 1fr 1.3fr;gap:16px;align-items:center;width:100%;box-sizing:border-box;padding:16px;text-align:left;border-width:1.5px;border-style:solid;border-radius:14px;font-family:inherit;font-size:16px;color:#10261C;cursor:pointer;{{ r.css }}">
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:700">{{ r.name }}</span>
+<span style="font-size:14px;color:#4D5F55">{{ r.code }} · {{ r.phoneText }}</span>
+</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:600">{{ r.court }}</span>
+<span style="font-size:14px;color:#4D5F55">{{ r.dateText }} · {{ r.timeText }}</span>
+</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:600">{{ r.dpLine }}</span>
+<span style="font-size:14px;color:#4D5F55">Total {{ r.totalText }}</span>
+</span>
+<span style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0">
+<span style="padding:4px 10px;border-radius:999px;font-weight:600;font-size:13px;{{ r.badgeCss }}">{{ r.statusLabel }}</span>
+<span style="font-size:13px;color:#4D5F55">{{ r.agoText }}</span>
+</span>
+</button>
+</sc-for>
+<sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+<p style="margin:16px 0;font-size:16px;line-height:1.6;color:#3F5247">{{ emptyText }}</p>
+</sc-if>
+</div>
+</div>
+</section>
+
+<aside aria-label="Detail booking" style="flex:1 1 340px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
+<sc-if value="{{ noSel }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:16px;line-height:1.6;color:#3F5247">Pilih booking di daftar untuk melihat detail, bukti transfer, dan memverifikasi DP.</p>
+</sc-if>
+<sc-if value="{{ hasSel }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px">
+<span style="padding:4px 10px;border-radius:999px;font-weight:600;font-size:13px;{{ cur.badgeCss }}">{{ cur.statusLabel }}</span>
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;text-transform:uppercase">{{ cur.name }}</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;font-size:16px">
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Kode</span><span style="font-weight:600;text-align:right">{{ cur.code }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">WhatsApp</span><span style="font-weight:600;text-align:right">{{ cur.phoneText }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Lapangan</span><span style="font-weight:600;text-align:right">{{ cur.court }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Tanggal</span><span style="font-weight:600;text-align:right">{{ cur.dateLong }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Jam</span><span style="font-weight:600;text-align:right">{{ cur.timeText }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Total</span><span style="font-weight:600;text-align:right">{{ cur.totalText }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Pembayaran</span><span style="font-weight:600;text-align:right">{{ cur.dpLine }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Sisa di lokasi</span><span style="font-weight:600;text-align:right">{{ cur.remainText }}</span></div>
+</div>
+<a class="btn" href="{{ cur.waUrl }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;min-height:48px;box-sizing:border-box;border-radius:999px;border:1.5px solid #0C2B20;color:#0C2B20;font-weight:700;font-size:15px">Chat pelanggan via WhatsApp</a>
+<div style="display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:1px solid #D9D6CB">
+<span style="font-weight:600;font-size:15px">Bukti transfer</span>
+<sc-if value="{{ cur.hasProof }}" hint-placeholder-val="{{ false }}">
+<img src="{{ cur.proof }}" alt="Bukti transfer dari {{ cur.name }}" style="width:100%;max-height:420px;object-fit:contain;border-radius:12px;border:1px solid #D9D6CB;background:#F5F3EC">
+<span style="font-size:14px;color:#4D5F55">Diunggah {{ cur.proofAgo }}</span>
+</sc-if>
+<sc-if value="{{ cur.noProof }}" hint-placeholder-val="{{ true }}">
+<p style="margin:0;font-size:15px;line-height:1.55;color:#4D5F55">Belum ada bukti transfer. Menunggu pelanggan mengunggah.</p>
+</sc-if>
+</div>
+<sc-if value="{{ cur.isVerify }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<button type="button" class="btn" onClick="{{ verify }}" style="flex:1 1 150px;min-height:52px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:16px;cursor:pointer">Verifikasi DP</button>
+<button type="button" class="btn" onClick="{{ reject }}" style="flex:1 1 150px;min-height:52px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:16px;cursor:pointer">Tolak bukti</button>
+</div>
+</sc-if>
+<sc-if value="{{ cur.isOk }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:15px;line-height:1.55;color:#0F4A2A">Pembayaran sudah terverifikasi. Slot terkunci untuk pelanggan ini.</p>
+<sc-if value="{{ cur.canMarkPaid }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="btn" onClick="{{ cur.markPaid }}" style="min-height:52px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:16px;cursor:pointer">Catat pelunasan di lokasi ({{ cur.remainText }})</button>
+</sc-if>
+<sc-if value="{{ cur.isPaidFull }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:15px;line-height:1.55;color:#0F4A2A">Pelunasan di lokasi sudah dicatat. Booking ini lunas.</p>
+<button type="button" class="btn" onClick="{{ cur.unmarkPaid }}" style="min-height:48px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Batalkan catatan pelunasan</button>
+</sc-if>
+</sc-if>
+<sc-if value="{{ cur.isRej }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:15px;line-height:1.55;color:#7A1E16">Bukti ditolak. Slot kembali tersedia untuk pelanggan lain.</p>
+</sc-if>
+<sc-if value="{{ cur.isCancel }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:15px;line-height:1.55;color:#3F5247">{{ cur.cancelNote }}</p>
+<sc-if value="{{ cur.hasDpDecision }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px;border:1.5px solid #D9D6CB;border-radius:14px;display:flex;flex-direction:column;gap:12px">
+<span style="font-size:15px;line-height:1.5">{{ cur.dpDecisionText }}</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button type="button" class="btn" onClick="{{ cur.forfeitDp }}" aria-pressed="{{ cur.forfeitPressed }}" style="flex:1 1 150px;min-height:48px;box-sizing:border-box;border-width:1.5px;border-style:solid;border-radius:999px;font-weight:700;font-size:15px;cursor:pointer;{{ cur.forfeitCss }}">DP hangus (jadi pemasukan)</button>
+<button type="button" class="btn" onClick="{{ cur.refundDp }}" aria-pressed="{{ cur.refundPressed }}" style="flex:1 1 150px;min-height:48px;box-sizing:border-box;border-width:1.5px;border-style:solid;border-radius:999px;font-weight:700;font-size:15px;cursor:pointer;{{ cur.refundCss }}">DP dikembalikan</button>
+</div>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ cur.canCancel }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ askingCancel }}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-label="Konfirmasi pembatalan" style="padding:16px;border:1.5px solid #8A1F15;border-radius:14px;display:flex;flex-direction:column;gap:12px">
+<span style="font-size:15px;line-height:1.5">Batalkan booking ini? Slotnya langsung tersedia lagi untuk pelanggan lain.</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button type="button" class="btn" onClick="{{ doCancel }}" style="flex:1 1 140px;min-height:48px;border:none;border-radius:999px;background:#8A1F15;color:#FFFFFF;font-weight:700;font-size:15px;cursor:pointer">Ya, batalkan</button>
+<button type="button" class="btn" onClick="{{ keepBooking }}" style="flex:1 1 140px;min-height:48px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Tidak</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ notAskingCancel }}" hint-placeholder-val="{{ true }}">
+<button type="button" class="btn" onClick="{{ askCancel }}" style="min-height:48px;border:1.5px solid #8A1F15;border-radius:999px;background:transparent;color:#8A1F15;font-weight:700;font-size:15px;cursor:pointer">Batalkan booking ini</button>
+</sc-if>
+</sc-if>
+</sc-if>
+</aside>
+
+</div>
+</div>
+</sc-if>
+
+<!-- ============ TAB JADWAL LAPANGAN ============ -->
+<sc-if value="{{ showJadwal }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:28px">
+
+<div role="group" aria-label="Pilih tanggal" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px">
+<sc-for list="{{ days }}" as="day" hint-placeholder-count="14">
+<button type="button" onClick="{{ day.pick }}" aria-pressed="{{ day.pressed }}" style="flex:0 0 auto;min-width:76px;min-height:80px;box-sizing:border-box;padding:10px 8px;border-width:1.5px;border-style:solid;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;{{ day.css }}">
+<span style="font-size:13px;font-weight:600">{{ day.dow }}</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;line-height:1">{{ day.num }}</span>
+<span style="font-size:13px;font-weight:500">{{ day.mon }}</span>
+</button>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Slot terisi</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ jBooked }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Belum terverifikasi</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ jPending }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Slot ditutup</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ jBlocked }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#0C2B20;color:#F3F5EE;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#C3D2C8">Masih kosong</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1;color:{{accent}}">{{ jFree }}</span>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+
+<section aria-label="Jadwal per jam" style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="overflow-x:auto">
+<div style="min-width:560px;display:grid;grid-template-columns:72px repeat(3,minmax(0,1fr));gap:6px">
+<span></span>
+<span style="font-weight:700;font-size:16px;padding:0 4px 6px">{{ courtName0 }}</span>
+<span style="font-weight:700;font-size:16px;padding:0 4px 6px">{{ courtName1 }}</span>
+<span style="font-weight:700;font-size:16px;padding:0 4px 6px">{{ courtName2 }}</span>
+<sc-for list="{{ cells }}" as="c" hint-placeholder-count="42">
+<sc-if value="{{ c.isTime }}" hint-placeholder-val="{{ false }}">
+<span style="display:flex;align-items:center;min-height:56px;font-weight:600;font-size:15px;color:#3F5247">{{ c.label }}</span>
+</sc-if>
+<sc-if value="{{ c.isCell }}" hint-placeholder-val="{{ true }}">
+<button type="button" disabled="{{ c.disabled }}" onClick="{{ c.pick }}" aria-pressed="{{ c.pressed }}" aria-label="{{ c.aria }}" style="min-width:0;min-height:56px;box-sizing:border-box;padding:6px 10px;border-width:1.5px;border-radius:10px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;font-family:inherit;overflow:hidden;{{ c.css }}">
+<span style="max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;font-size:14px">{{ c.title }}</span>
+<span style="max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px">{{ c.sub }}</span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px 24px;font-size:14px;color:#3F5247">
+<span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:#FFFFFF;border:1.5px solid #8A968D"></span>Kosong</span>
+<span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:#0C2B20"></span>Terverifikasi</span>
+<span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:#FFE9A8;border:1.5px solid #E0C25A"></span>Perlu verifikasi</span>
+<span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:#E4E1D8;border:1.5px dashed #5A675F"></span>Menunggu transfer</span>
+<span style="display:inline-flex;align-items:center;gap:8px"><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:#C5CBC2;border:1.5px solid #7C897F"></span>Ditutup</span>
+</div>
+</section>
+
+<aside aria-label="Detail slot" style="flex:1 1 340px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
+<sc-if value="{{ dNone }}" hint-placeholder-val="{{ true }}">
+<p style="margin:0;font-size:16px;line-height:1.6;color:#3F5247">Pilih slot di jadwal untuk melihat detail, atau tutup slot untuk perawatan lapangan.</p>
+</sc-if>
+<sc-if value="{{ hasDet }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-weight:600;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;color:#1F6B45">Slot dipilih</span>
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:32px;line-height:1;text-transform:uppercase">{{ dTitle }}</h2>
+<span style="font-size:16px;color:#3F5247">{{ dateLong }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ dBooked }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px">
+<span style="padding:4px 10px;border-radius:999px;font-weight:600;font-size:13px;{{ sdBadgeCss }}">{{ sdStatus }}</span>
+<span style="font-weight:700;font-size:22px">{{ sdName }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;font-size:16px">
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Kode</span><span style="font-weight:600;text-align:right">{{ sdCode }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Jam booking</span><span style="font-weight:600;text-align:right">{{ sdRange }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Total</span><span style="font-weight:600;text-align:right">{{ sdTotal }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Pembayaran</span><span style="font-weight:600;text-align:right">{{ sdDp }}</span></div>
+</div>
+<button type="button" class="btn" onClick="{{ openSlotBooking }}" style="min-height:52px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:16px;cursor:pointer">Buka di tab Booking</button>
+</sc-if>
+<sc-if value="{{ dFree }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:16px;line-height:1.6;color:#3F5247">Slot ini kosong dan bisa dipesan pelanggan.</p>
+<button type="button" class="btn" onClick="{{ toggleBlock }}" style="min-height:52px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:16px;cursor:pointer">Tutup slot ini</button>
+</sc-if>
+<sc-if value="{{ dBlocked }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:16px;line-height:1.6;color:#3F5247">Slot ini ditutup, jadi pelanggan tidak bisa memesannya.</p>
+<button type="button" class="btn" onClick="{{ toggleBlock }}" style="min-height:52px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:16px;cursor:pointer">Buka kembali</button>
+</sc-if>
+</aside>
+
+</div>
+</div>
+</sc-if>
+
+<!-- ============ TAB RIWAYAT ============ -->
+<sc-if value="{{ showRiwayat }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:28px">
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Booking selesai</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ hDone }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Batal, ditolak, atau kedaluwarsa</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1">{{ hLost }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#0C2B20;color:#F3F5EE;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#C3D2C8">Pembayaran masuk</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,3.3vw,40px);white-space:nowrap;line-height:1;color:{{accent}}">{{ hPaid }}</span>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px">
+<div role="group" aria-label="Filter status riwayat" style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ htabs }}" as="htab" hint-placeholder-count="5">
+<button type="button" onClick="{{ htab.pick }}" aria-pressed="{{ htab.pressed }}" style="min-height:44px;box-sizing:border-box;padding:0 18px;border-width:1.5px;border-style:solid;border-radius:999px;font-weight:600;font-size:15px;cursor:pointer;{{ htab.css }}">{{ htab.label }} ({{ htab.count }})</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;flex:1 1 280px;max-width:420px">
+<label for="cari-riwayat" style="font-weight:600;font-size:15px">Cari nama atau kode booking</label>
+<input id="cari-riwayat" type="search" value="{{ hquery }}" onChange="{{ onHQuery }}" placeholder="Contoh: GA-4F7K2" style="min-height:48px;box-sizing:border-box;padding:0 14px;border:1.5px solid #7C897F;border-radius:10px;font-family:inherit;font-size:16px;color:#10261C;background:#FFFFFF">
+</div>
+</div>
+
+<section aria-label="Daftar riwayat" style="display:flex;flex-direction:column;gap:10px">
+<div style="overflow-x:auto">
+<div style="min-width:780px;display:flex;flex-direction:column;gap:8px">
+<div style="display:grid;grid-template-columns:1fr 1.6fr 1.6fr 1.2fr 1.2fr;gap:16px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4D5F55">
+<span>Tanggal</span>
+<span>Pemesan</span>
+<span>Lapangan dan jam</span>
+<span>Pembayaran</span>
+<span>Status</span>
+</div>
+<sc-for list="{{ hrows }}" as="h" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:1fr 1.6fr 1.6fr 1.2fr 1.2fr;gap:16px;align-items:center;box-sizing:border-box;padding:16px;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:14px;font-size:16px">
+<span style="font-weight:600">{{ h.dateText }}</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:700">{{ h.name }}</span>
+<span style="font-size:14px;color:#4D5F55">{{ h.code }}</span>
+</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:600">{{ h.court }}</span>
+<span style="font-size:14px;color:#4D5F55">{{ h.timeText }}</span>
+</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:600">{{ h.paidText }}</span>
+<span style="font-size:14px;color:#4D5F55">Total {{ h.totalText }}</span>
+</span>
+<span style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0">
+<span style="padding:4px 10px;border-radius:999px;font-weight:600;font-size:13px;{{ h.badgeCss }}">{{ h.statusLabel }}</span>
+<span style="font-size:13px;color:#4D5F55">{{ h.note }}</span>
+</span>
+</div>
+</sc-for>
+<sc-if value="{{ hNoRows }}" hint-placeholder-val="{{ false }}">
+<p style="margin:16px 0;font-size:16px;line-height:1.6;color:#3F5247">{{ hEmptyText }}</p>
+</sc-if>
+</div>
+</div>
+</section>
+
+</div>
+</sc-if>
+
+<!-- ============ TAB SCAN QR ============ -->
+<sc-if value="{{ showScan }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+
+<section aria-label="Pindai QR" style="flex:1 1 380px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;letter-spacing:0.02em;text-transform:uppercase">Pindai QR pelanggan</h2>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3F5247">Pindai QR di tiket pelanggan untuk melihat detail booking dan sisa pembayaran.</p>
+<sc-if value="{{ scanning }}" hint-placeholder-val="{{ false }}">
+<div style="position:relative;width:100%;border-radius:16px;overflow:hidden;background:#10261C">
+<video id="scan-video" style="display:block;width:100%;aspect-ratio:4/3;object-fit:cover"></video>
+<div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:56%;aspect-ratio:1/1;transform:translate(-50%,-50%);border:3px solid {{accent}};border-radius:16px;box-shadow:0 0 0 9999px rgba(12,43,32,0.45)"></div>
+</div>
+<button type="button" class="btn" onClick="{{ closeCamera }}" style="min-height:52px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:16px;cursor:pointer">Tutup kamera</button>
+</sc-if>
+<sc-if value="{{ notScanning }}" hint-placeholder-val="{{ true }}">
+<button type="button" class="btn" onClick="{{ startScan }}" style="min-height:52px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:16px;cursor:pointer">Buka kamera dan pindai</button>
+</sc-if>
+<sc-if value="{{ hasScanMsg }}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin:0;padding:12px 14px;border-radius:10px;background:#FFE9A8;color:#4F3A00;font-size:15px;line-height:1.5">{{ scanMsg }}</p>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:16px;border-top:1px solid #D9D6CB">
+<label for="scan-file" style="font-weight:600;font-size:15px">Atau pindai dari foto atau tangkapan layar</label>
+<input id="scan-file" type="file" accept="image/*" onChange="{{ onScanFile }}" style="box-sizing:border-box;width:100%;min-height:44px;padding:8px 10px;border:1.5px solid #7C897F;border-radius:10px;font-family:inherit;font-size:14px;color:#10261C;background:#FFFFFF">
+<span style="font-size:13px;line-height:1.5;color:#4D5F55">Di HP, pilihan ini juga bisa membuka kamera untuk memotret QR.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding-top:16px;border-top:1px solid #D9D6CB">
+<label for="scan-code" style="font-weight:600;font-size:15px">Atau ketik kode booking</label>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<input id="scan-code" type="text" value="{{ scanInput }}" onChange="{{ onScanInput }}" placeholder="Contoh: GA-4F7K2" style="flex:1 1 180px;min-width:0;min-height:48px;box-sizing:border-box;padding:0 14px;border:1.5px solid #7C897F;border-radius:10px;font-family:inherit;font-size:16px;color:#10261C;background:#FFFFFF">
+<button type="button" class="btn" onClick="{{ doScanLookup }}" style="min-height:48px;padding:0 22px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:15px;cursor:pointer">Cari kode</button>
+</div>
+</div>
+</section>
+
+<aside aria-label="Hasil scan" style="flex:1 1 380px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
+<sc-if value="{{ noScan }}" hint-placeholder-val="{{ true }}">
+<p style="margin:0;font-size:16px;line-height:1.6;color:#3F5247">Hasil pindai muncul di sini: detail booking, jumlah yang sudah dibayar, dan sisa pembayaran di lokasi.</p>
+</sc-if>
+<sc-if value="{{ sc.has }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:flex-start;gap:10px">
+<span style="padding:4px 10px;border-radius:999px;font-weight:600;font-size:13px;{{ sc.badgeCss }}">{{ sc.badgeLabel }}</span>
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;text-transform:uppercase">{{ sc.code }}</h2>
+</div>
+<sc-if value="{{ sc.noMatch }}" hint-placeholder-val="{{ false }}">
+<p style="margin:0;font-size:15px;line-height:1.6;color:#7A1E16">{{ sc.sourceNote }}</p>
+</sc-if>
+<sc-if value="{{ sc.hasWarnings }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ sc.warnings }}" as="w" hint-placeholder-count="2">
+<p role="alert" style="margin:0;padding:12px 14px;border-radius:10px;background:#FFE9A8;color:#4F3A00;font-size:15px;line-height:1.5">{{ w.text }}</p>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ sc.hasDetail }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;font-size:16px">
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Nama</span><span style="font-weight:600;text-align:right">{{ sc.name }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">WhatsApp</span><span style="font-weight:600;text-align:right">{{ sc.phone }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Lapangan</span><span style="font-weight:600;text-align:right">{{ sc.court }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Tanggal</span><span style="font-weight:600;text-align:right">{{ sc.dateLong }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Jam</span><span style="font-weight:600;text-align:right">{{ sc.timeText }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Total tagihan</span><span style="font-weight:600;text-align:right">{{ sc.totalText }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:16px"><span style="color:#4D5F55">Sudah dibayar</span><span style="font-weight:600;text-align:right">{{ sc.paidText }} <span style="font-weight:500;color:#4D5F55">{{ sc.paidPct }}</span></span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:20px;border-radius:16px;background:#0C2B20;color:#F3F5EE">
+<span style="font-size:14px;color:#C3D2C8">{{ sc.remainLabel }}</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,4vw,44px);line-height:1;color:{{accent}}">{{ sc.remainText }}</span>
+</div>
+<p style="margin:0;font-size:13px;line-height:1.5;color:#4D5F55">{{ sc.sourceNote }}</p>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<sc-if value="{{ sc.canPay }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="btn" onClick="{{ sc.markPaid }}" style="flex:1 1 220px;min-height:52px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:16px;cursor:pointer">Catat pelunasan di lokasi</button>
+</sc-if>
+<sc-if value="{{ sc.canOpen }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="btn" onClick="{{ sc.openIt }}" style="flex:1 1 180px;min-height:52px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:16px;cursor:pointer">Buka di tab Booking</button>
+</sc-if>
+<button type="button" class="btn" onClick="{{ scanAgain }}" style="flex:1 1 140px;min-height:52px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:16px;cursor:pointer">Pindai lagi</button>
+</div>
+</sc-if>
+</aside>
+
+</div>
+</sc-if>
+
+<!-- ============ TAB LAPORAN KEUANGAN ============ -->
+<sc-if value="{{ showLaporan }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:28px">
+
+<section aria-label="Pilih bulan" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+<button type="button" class="btn" onClick="{{ prevMonth }}" style="min-height:48px;padding:0 18px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">‹ Bulan sebelumnya</button>
+<span aria-live="polite" style="min-width:220px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:34px;line-height:1;text-transform:uppercase">{{ monthTitle }}</span>
+<button type="button" class="btn" onClick="{{ nextMonth }}" style="min-height:48px;padding:0 18px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Bulan berikutnya ›</button>
+<sc-if value="{{ notThisMonth }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="btn" onClick="{{ thisMonth }}" style="min-height:48px;padding:0 18px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:15px;cursor:pointer">Ke bulan ini</button>
+</sc-if>
+</div>
+<div role="group" aria-label="Bulan tersimpan" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+<span style="font-size:14px;color:#4D5F55">Bulan tersimpan:</span>
+<sc-for list="{{ monthChips }}" as="mc" hint-placeholder-count="3">
+<button type="button" onClick="{{ mc.pick }}" aria-pressed="{{ mc.pressed }}" style="min-height:44px;box-sizing:border-box;padding:0 16px;border-width:1.5px;border-style:solid;border-radius:999px;font-weight:600;font-size:15px;cursor:pointer;{{ mc.css }}">{{ mc.label }} ({{ mc.count }})</button>
+</sc-for>
+</div>
+</section>
+
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<div style="flex:1 1 220px;min-width:0;box-sizing:border-box;background:#0C2B20;color:#F3F5EE;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#C3D2C8">Pemasukan diterima</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,3.3vw,40px);white-space:nowrap;line-height:1;color:{{accent}}">{{ repIncome }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">DP masuk</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,3.3vw,40px);white-space:nowrap;line-height:1">{{ repDp }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Pelunasan di lokasi</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,3.3vw,40px);white-space:nowrap;line-height:1">{{ repRest }}</span>
+</div>
+<div style="flex:1 1 200px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+<span style="font-size:14px;color:#4D5F55">Sisa belum dibayar</span>
+<span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(30px,3.3vw,40px);white-space:nowrap;line-height:1">{{ repRemain }}</span>
+</div>
+</div>
+<p style="margin:-12px 0 0;font-size:15px;line-height:1.6;color:#3F5247">{{ factLine }}</p>
+
+<section aria-label="Pemasukan per lapangan" style="display:flex;flex-direction:column;gap:10px">
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;letter-spacing:0.02em;text-transform:uppercase">Per lapangan</h2>
+<div style="overflow-x:auto">
+<div style="min-width:520px;display:flex;flex-direction:column;gap:8px">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:16px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4D5F55">
+<span>Lapangan</span>
+<span>Booking</span>
+<span>Jam</span>
+<span>Pemasukan</span>
+</div>
+<sc-for list="{{ courtStats }}" as="cs" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:16px;align-items:center;box-sizing:border-box;padding:14px 16px;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:14px;font-size:16px">
+<span style="font-weight:700">{{ cs.name }}</span>
+<span>{{ cs.bookings }}</span>
+<span>{{ cs.hours }}</span>
+<span style="font-weight:600">{{ cs.incomeText }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section aria-label="Riwayat transaksi" style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;letter-spacing:0.02em;text-transform:uppercase">Riwayat transaksi</h2>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<button type="button" class="btn" onClick="{{ exportMonth }}" style="min-height:48px;padding:0 20px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:15px;cursor:pointer">Unduh Excel bulan ini</button>
+<button type="button" class="btn" onClick="{{ exportAll }}" style="min-height:48px;padding:0 20px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Unduh Excel semua bulan</button>
+</div>
+</div>
+<sc-if value="{{ hasExportMsg }}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin:0;padding:12px 14px;border-radius:10px;background:#E6EEDC;color:#10261C;font-size:15px;line-height:1.5">{{ exportMsg }}</p>
+</sc-if>
+<div style="overflow-x:auto">
+<div style="min-width:980px;display:flex;flex-direction:column;gap:8px">
+<div style="display:grid;grid-template-columns:1.1fr 1.6fr 1.7fr 1fr 1.5fr 1.6fr 1.2fr;gap:16px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#4D5F55">
+<span>Tanggal main</span>
+<span>Pemesan</span>
+<span>Lapangan dan jam</span>
+<span>Total</span>
+<span>Pemasukan</span>
+<span>Status</span>
+<span>Aksi</span>
+</div>
+<sc-for list="{{ repRows }}" as="rr" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:1.1fr 1.6fr 1.7fr 1fr 1.5fr 1.6fr 1.2fr;gap:16px;align-items:center;box-sizing:border-box;padding:16px;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:14px;font-size:16px">
+<span style="font-weight:600">{{ rr.dateText }}</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:700">{{ rr.name }}</span>
+<span style="font-size:14px;color:#4D5F55">{{ rr.code }}</span>
+</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:600">{{ rr.court }}</span>
+<span style="font-size:14px;color:#4D5F55">{{ rr.timeText }}</span>
+</span>
+<span>{{ rr.totalText }}</span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span style="font-weight:700">{{ rr.incomeText }}</span>
+<span style="font-size:14px;color:#4D5F55">{{ rr.splitText }}</span>
+</span>
+<span style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0">
+<span style="padding:4px 10px;border-radius:999px;font-weight:600;font-size:13px;{{ rr.badgeCss }}">{{ rr.statusLabel }}</span>
+<span style="font-size:13px;color:#4D5F55">{{ rr.note }}</span>
+</span>
+<span style="display:flex;flex-direction:column;align-items:flex-start;gap:4px">
+<sc-if value="{{ rr.canPay }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ rr.pay }}" style="min-height:44px;padding:0 2px;border:none;background:transparent;color:#1F6B45;font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer">Catat lunas</button>
+</sc-if>
+<button type="button" onClick="{{ rr.open }}" style="min-height:44px;padding:0 2px;border:none;background:transparent;color:#10261C;font-weight:600;font-size:14px;text-decoration:underline;cursor:pointer">Buka detail</button>
+</span>
+</div>
+</sc-for>
+<sc-if value="{{ repNoRows }}" hint-placeholder-val="{{ true }}">
+<p style="margin:16px 0;font-size:16px;line-height:1.6;color:#3F5247">{{ repEmptyText }}</p>
+</sc-if>
+</div>
+</div>
+<p style="margin:0;font-size:14px;line-height:1.6;color:#4D5F55">Transaksi dikelompokkan menurut bulan tanggal main. Booking dihitung setelah DP diverifikasi; sisa pembayaran dihitung setelah dicatat lunas. DP booking yang dibatalkan hanya dihitung bila ditandai hangus di detail booking.</p>
+</section>
+
+</div>
+</sc-if>
+
+<!-- ============ TAB PENGATURAN ============ -->
+<sc-if value="{{ showPengaturan }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+
+<div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:24px">
+
+<section aria-label="Foto" style="box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;letter-spacing:0.02em;text-transform:uppercase">Foto di halaman pelanggan</h2>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3F5247">Foto diperkecil otomatis agar ringan. Foto utama dipakai sebagai latar penuh di bagian atas halaman pelanggan (pakai foto lapangan yang mendatar, lebar minimal 1600 px). Kalau belum diunggah, tampil latar lapangan bawaan.</p>
+<sc-if value="{{ hasPhotoMsg }}" hint-placeholder-val="{{ false }}">
+<p role="alert" style="margin:0;padding:12px 14px;border-radius:10px;background:#FAD4D0;color:#7A1E16;font-size:15px;line-height:1.5">{{ photoMsg }}</p>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<sc-for list="{{ photoEdits }}" as="p" hint-placeholder-count="4">
+<div style="flex:1 1 240px;min-width:0;box-sizing:border-box;border:1px solid #D9D6CB;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+<span style="font-weight:700;font-size:16px">{{ p.label }}</span>
+<sc-if value="{{ p.hasPhoto }}" hint-placeholder-val="{{ false }}">
+<img src="{{ p.photo }}" alt="Foto {{ p.label }}" style="width:100%;aspect-ratio:560/300;object-fit:cover;border-radius:10px;display:block">
+</sc-if>
+<sc-if value="{{ p.noPhoto }}" hint-placeholder-val="{{ true }}">
+<div style="width:100%;aspect-ratio:560/300;box-sizing:border-box;border:1.5px dashed #7C897F;border-radius:10px;background:#F5F3EC;display:flex;align-items:center;justify-content:center;color:#4D5F55;font-size:14px">Belum ada foto</div>
+</sc-if>
+<label for="{{ p.inputId }}" style="font-weight:600;font-size:14px">Ganti foto</label>
+<input id="{{ p.inputId }}" type="file" accept="image/*" onChange="{{ p.upload }}" style="box-sizing:border-box;width:100%;min-height:44px;padding:8px 10px;border:1.5px solid #7C897F;border-radius:10px;font-family:inherit;font-size:14px;color:#10261C;background:#FFFFFF">
+<sc-if value="{{ p.hasPhoto }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ p.remove }}" style="align-self:flex-start;min-height:44px;padding:0 2px;border:none;background:transparent;color:#7A1E16;font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer">Hapus foto</button>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-label="Data usaha" style="box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;letter-spacing:0.02em;text-transform:uppercase">Data, harga, dan ketentuan</h2>
+<p style="margin:0;font-size:15px;line-height:1.6;color:#3F5247">Perubahan tersimpan otomatis dan langsung dipakai halaman pelanggan.</p>
+<sc-for list="{{ settingFields }}" as="item" hint-placeholder-count="30">
+<sc-if value="{{ item.isHeading }}" hint-placeholder-val="{{ false }}">
+<h3 style="margin:12px 0 0;padding-top:20px;border-top:1px solid #D9D6CB;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:0.02em;text-transform:uppercase;color:#1F6B45">{{ item.label }}</h3>
+</sc-if>
+<sc-if value="{{ item.isInput }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="{{ item.id }}" style="font-weight:600;font-size:15px">{{ item.label }}</label>
+<input id="{{ item.id }}" type="{{ item.type }}" value="{{ item.value }}" onChange="{{ item.change }}" style="min-height:48px;box-sizing:border-box;padding:0 14px;border:1.5px solid #7C897F;border-radius:10px;font-family:inherit;font-size:16px;color:#10261C;background:#FFFFFF">
+<span style="font-size:13px;line-height:1.5;color:#4D5F55">{{ item.hint }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ item.isArea }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<label for="{{ item.id }}" style="font-weight:600;font-size:15px">{{ item.label }}</label>
+<textarea id="{{ item.id }}" rows="5" value="{{ item.value }}" onChange="{{ item.change }}" style="box-sizing:border-box;padding:12px 14px;border:1.5px solid #7C897F;border-radius:10px;font-family:inherit;font-size:16px;line-height:1.5;color:#10261C;background:#FFFFFF;resize:vertical"></textarea>
+<span style="font-size:13px;line-height:1.5;color:#4D5F55">{{ item.hint }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ item.isNote }}" hint-placeholder-val="{{ false }}">
+<p role="alert" style="margin:0;padding:12px 14px;border-radius:10px;background:#FAD4D0;color:#7A1E16;font-size:15px;line-height:1.5">{{ item.label }}</p>
+</sc-if>
+</sc-for>
+</section>
+
+</div>
+
+<aside aria-label="Penyimpanan dan data" style="flex:1 1 320px;min-width:0;box-sizing:border-box;background:#FFFFFF;border:1px solid #D9D6CB;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;letter-spacing:0.02em;text-transform:uppercase">Penyimpanan data</h2>
+<div style="padding:14px 16px;border-radius:12px;background:#E6EEDC;color:#10261C;font-size:15px;line-height:1.6">
+<span style="font-weight:700">Data online.</span> {{ storageNote }}
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid #D9D6CB">
+<span style="font-weight:600;font-size:15px">Notifikasi</span>
+<p style="margin:0;font-size:14px;line-height:1.55;color:#3F5247">Notifikasi dikirim saat pelanggan mengirim bukti transfer atau membatalkan. Isi Token bot dan ID chat Telegram di kolom Pengaturan di sebelah kiri, simpan, lalu tekan tombol tes.</p>
+<button type="button" class="btn" onClick="{{ testNotify }}" style="min-height:48px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:15px;cursor:pointer">Kirim tes ke Telegram</button>
+<button type="button" class="btn" onClick="{{ enableBrowserNotif }}" style="min-height:48px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">{{ browserNotifLabel }}</button>
+<sc-if value="{{ hasNotifyMsg }}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin:0;font-size:14px;line-height:1.55;color:#3F5247">{{ notifyMsg }}</p>
+</sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid #D9D6CB">
+<span style="font-weight:600;font-size:15px">Cadangan laporan</span>
+<p style="margin:0;font-size:14px;line-height:1.55;color:#3F5247">Laporan keuangan semua bulan tersimpan selama data tidak dihapus. Unduh salinan Excel secara berkala.</p>
+<button type="button" class="btn" onClick="{{ exportAll }}" style="min-height:48px;border:none;border-radius:999px;background:#0C2B20;color:{{accent}};font-weight:700;font-size:15px;cursor:pointer">Unduh Excel semua bulan</button>
+<sc-if value="{{ hasExportMsg }}" hint-placeholder-val="{{ false }}">
+<p role="status" style="margin:0;font-size:14px;line-height:1.55;color:#3F5247">{{ exportMsg }}</p>
+</sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid #D9D6CB">
+<span style="font-weight:600;font-size:15px">Mulai dari nol</span>
+<sc-if value="{{ confirmBookings }}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-label="Konfirmasi hapus booking" style="padding:16px;border:1.5px solid #8A1F15;border-radius:14px;display:flex;flex-direction:column;gap:12px">
+<span style="font-size:15px;line-height:1.5">Hapus semua booking, riwayat, laporan keuangan semua bulan, dan slot yang ditutup? Ini tidak bisa dibatalkan. Unduh Excel semua bulan dulu kalau datanya masih dibutuhkan.</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button type="button" class="btn" onClick="{{ doResetBookings }}" style="flex:1 1 130px;min-height:48px;border:none;border-radius:999px;background:#8A1F15;color:#FFFFFF;font-weight:700;font-size:15px;cursor:pointer">Ya, hapus</button>
+<button type="button" class="btn" onClick="{{ cancelReset }}" style="flex:1 1 130px;min-height:48px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Batal</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ notConfirmBookings }}" hint-placeholder-val="{{ true }}">
+<button type="button" class="btn" onClick="{{ askResetBookings }}" style="min-height:48px;border:1.5px solid #8A1F15;border-radius:999px;background:transparent;color:#8A1F15;font-weight:700;font-size:15px;cursor:pointer">Hapus semua booking</button>
+</sc-if>
+<sc-if value="{{ confirmSettings }}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-label="Konfirmasi kembalikan pengaturan" style="padding:16px;border:1.5px solid #8A1F15;border-radius:14px;display:flex;flex-direction:column;gap:12px">
+<span style="font-size:15px;line-height:1.5">Kembalikan semua pengaturan dan foto ke awal? Booking tidak ikut terhapus.</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<button type="button" class="btn" onClick="{{ doResetSettings }}" style="flex:1 1 130px;min-height:48px;border:none;border-radius:999px;background:#8A1F15;color:#FFFFFF;font-weight:700;font-size:15px;cursor:pointer">Ya, kembalikan</button>
+<button type="button" class="btn" onClick="{{ cancelReset }}" style="flex:1 1 130px;min-height:48px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Batal</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ notConfirmSettings }}" hint-placeholder-val="{{ true }}">
+<button type="button" class="btn" onClick="{{ askResetSettings }}" style="min-height:48px;border:1.5px solid #0C2B20;border-radius:999px;background:transparent;color:#0C2B20;font-weight:700;font-size:15px;cursor:pointer">Kembalikan pengaturan awal</button>
+</sc-if>
+</div>
+</aside>
+
+</div>
+</sc-if>
+
+</main>
+</div>
+</template>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C9F23C","options":["#C9F23C","#FFD23F","#7CF2C0"],"section":"Tampilan"},"$preview":{"width":1280,"height":2100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this._proofs = {};
+    this._ver = '';
+    this._pending = 0;
+    this._q = Promise.resolve();
+    this._seen = {};
+    this._alertReady = false;
+    this._lastSync = 0;
+    const data = this.loadStore();
+    this.state = {
+      data: data,
+      loaded: false,
+      tick: Date.now(),
+      storeOk: true,
+      syncMsg: '',
+      notifyMsg: '',
+      notifPerm: (typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'),
+      view: 'booking',
+      sel: '',
+      filter: 'all',
+      query: '',
+      hfilter: 'all',
+      hquery: '',
+      dayIdx: 0,
+      selKey: '',
+      notifOpen: false,
+      notifLeft: 16,
+      notifTop: 80,
+      notifW: 340,
+      bannerOpen: true,
+      prevUnseen: data.bookings.filter((b) => b.unseen).length,
+      confirmCancel: false,
+      confirmReset: '',
+      photoMsg: '',
+      reportMonth: '',
+      exportMsg: '',
+      scanning: false,
+      scanMsg: '',
+      scanRes: null,
+      scanInput: '',
+    };
+  }
+
+  componentDidMount() {
+    this._timer = setInterval(() => this.setState({ tick: Date.now() }), 2000);
+    this._net = setInterval(() => { if (!document.hidden && Date.now() - this._lastSync >= 12000) this.sync(); }, 3000);
+    this._vis = () => { if (!document.hidden) this.sync(); };
+    document.addEventListener('visibilitychange', this._vis);
+    this.sync(true);
+  }
+
+  componentWillUnmount() {
+    if (this._timer) clearInterval(this._timer);
+    if (this._net) clearInterval(this._net);
+    if (this._vis) document.removeEventListener('visibilitychange', this._vis);
+    if (this._scanTimer) clearTimeout(this._scanTimer);
+    if (this._stream) this._stream.getTracks().forEach((tr) => tr.stop());
+  }
+
+  /* ---------- penyimpanan (satu kunci, dibagi dengan halaman pelanggan) ---------- */
+  defaults() {
+    return {
+      v: 1,
+      settings: {
+        name: 'Gol Arena Futsal',
+        heroPhoto: '',
+        courts: [
+          { name: 'Lapangan 1', type: '', photo: '' },
+          { name: 'Lapangan 2', type: '', photo: '' },
+          { name: 'Lapangan 3', type: '', photo: '' },
+        ],
+        priceWeekdayDay: 100000,
+        priceWeekdayNight: 150000,
+        priceWeekendDay: 130000,
+        priceWeekendNight: 180000,
+        dpWeekday: 20000,
+        dpWeekend: 35000,
+        openHour: 8,
+        closeHour: 22,
+        nightFrom: 17,
+        holdMinutes: 30,
+        whatsapp: '088901675385',
+        instagram: '',
+        address: '4HG6+GR4 Cibabat, Kota Cimahi, Jawa Barat',
+        bankName: '',
+        bankNumber: '',
+        bankHolder: '',
+        facilities: '',
+        policy: '',
+        telegramToken: '',
+        telegramChatId: '',
+      },
+      bookings: [],
+      blocked: {},
+    };
+  }
+
+  loadStore() {
+    return this.defaults();
+  }
+
+  setState(p, cb) {
+    super.setState(p, cb);
+    if (p && typeof p === 'object' && p.sel) this.loadProof(p.sel);
+  }
+
+  adminKey() {
+    const m = /\/a\/([A-Za-z0-9_-]{16,})\/?/.exec(window.location.pathname);
+    return m ? m[1] : '';
+  }
+
+  async api(method, path, body) {
+    const key = this.adminKey();
+    if (!key) return { ok: false, status: 401, error: 'Link admin tidak valid.' };
+    let res;
+    try {
+      const headers = { 'x-admin-key': key };
+      if (body) headers['content-type'] = 'application/json';
+      res = await fetch(path, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+    } catch (e) {
+      return { ok: false, status: 0, error: 'Tidak bisa terhubung ke server. Periksa internet.' };
+    }
+    let data = null;
+    try { data = await res.json(); } catch (e) { data = null; }
+    if (!res.ok) return { ok: false, status: res.status, code: data && data.code, error: (data && data.error) || 'Terjadi kesalahan. Coba lagi.' };
+    return { ok: true, status: res.status, data: data };
+  }
+
+  async sync(force) {
+    if (this._syncing) { if (force) this._again = true; return; }
+    if (this._pending > 0) return;
+    this._syncing = true;
+    this._lastSync = Date.now();
+    try {
+      const r = await this.api('GET', '/api/admin/state' + (force || !this._ver ? '' : '?v=' + encodeURIComponent(this._ver)));
+      if (this._pending > 0) return;
+      if (!r.ok) {
+        this.setState({
+          storeOk: false,
+          syncMsg: r.status === 401 ? 'Link admin ini tidak valid atau sudah diganti. Buka lagi link admin yang benar.' : (r.status === 0 ? 'Tidak bisa terhubung ke server. Data di layar mungkin belum terbaru.' : r.error),
+        });
+        return;
+      }
+      const p = r.data;
+      this._ver = p.version;
+      if (!p.changed) { this.setState({ storeOk: true, syncMsg: this.state.loaded ? '' : this.state.syncMsg, tick: Date.now() }); return; }
+      const base = this.defaults();
+      const ps = p.data.settings || {};
+      const st = Object.assign({}, base.settings, ps);
+      const pc = Array.isArray(ps.courts) ? ps.courts : [];
+      st.courts = base.settings.courts.map((c, i) => Object.assign({}, c, pc[i] || {}));
+      const data = { v: 1, settings: st, bookings: p.data.bookings || [], blocked: p.data.blocked || {} };
+      const unseen = data.bookings.filter((b) => b.unseen);
+      const fresh = unseen.filter((b) => !this._seen[b.id]);
+      unseen.forEach((b) => { this._seen[b.id] = 1; });
+      this.setState({
+        data: data, loaded: true, storeOk: true, syncMsg: '', tick: Date.now(),
+        bannerOpen: unseen.length > this.state.prevUnseen ? true : this.state.bannerOpen,
+        prevUnseen: unseen.length,
+      });
+      this.updateTitle(unseen.length);
+      if (this._alertReady && fresh.length) this.alertNew(fresh);
+      this._alertReady = true;
+      if (this.state.sel) this.loadProof(this.state.sel);
+    } finally {
+      this._syncing = false;
+      if (this._again) { this._again = false; this.sync(true); }
+    }
+  }
+
+  updateTitle(n) {
+    try { document.title = (n ? '(' + n + ') ' : '') + 'Dashboard Admin Gol Arena'; } catch (e) { /* abaikan */ }
+  }
+
+  beep() {
+    try {
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return;
+      if (!this._ac) this._ac = new C();
+      const ac = this._ac;
+      if (ac.state === 'suspended') ac.resume();
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = 880; g.gain.value = 0.08;
+      o.connect(g); g.connect(ac.destination);
+      o.start(); o.stop(ac.currentTime + 0.3);
+    } catch (e) { /* abaikan */ }
+  }
+
+  alertNew(list) {
+    this.beep();
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        const b = list[0];
+        const what = b.status === 'cancel' ? 'Booking dibatalkan pelanggan' : 'Transfer baru masuk';
+        new Notification(what, { body: b.code + ' · ' + b.name + (list.length > 1 ? ' dan ' + (list.length - 1) + ' lainnya' : ''), tag: 'golarena-' + b.id });
+      }
+    } catch (e) { /* abaikan */ }
+  }
+
+  async enableBrowserNotif() {
+    this.beep();
+    if (typeof Notification === 'undefined') { this.setState({ notifyMsg: 'Browser ini tidak mendukung notifikasi. Pakai Telegram untuk notifikasi di HP.', notifPerm: 'unsupported' }); return; }
+    let perm = Notification.permission;
+    try { perm = await Notification.requestPermission(); } catch (e) { /* abaikan */ }
+    this.setState({
+      notifPerm: perm,
+      notifyMsg: perm === 'granted' ? 'Notifikasi browser aktif. Pemberitahuan dan bunyi muncul selama halaman admin ini terbuka.' : 'Notifikasi browser tidak diizinkan. Izinkan lewat pengaturan situs di browser.',
+    });
+  }
+
+  async testNotify() {
+    this.setState({ notifyMsg: 'Mengirim tes…' });
+    const r = await this.api('POST', '/api/admin/notify-test', {});
+    this.setState({ notifyMsg: r.ok ? 'Pesan tes terkirim ke Telegram. Cek HP Anda.' : r.error });
+  }
+
+  async loadProof(id) {
+    const b = this.state.data.bookings.find((x) => x.id === id);
+    if (!b || !b.hasProof || this._proofs[id] !== undefined) return;
+    this._proofs[id] = null;
+    const r = await this.api('GET', '/api/admin/proof?id=' + encodeURIComponent(id));
+    if (r.ok) { this._proofs[id] = r.data.proof; this.setState({ tick: Date.now() }); } else { delete this._proofs[id]; }
+  }
+
+  diff(a, b) {
+    const patch = {};
+    const sp = {};
+    Object.keys(b.settings).forEach((k) => { if (JSON.stringify(a.settings[k]) !== JSON.stringify(b.settings[k])) sp[k] = b.settings[k]; });
+    if (Object.keys(sp).length) patch.settings = sp;
+    if (a.bookings.length && !b.bookings.length) {
+      patch.resetBookings = true;
+    } else {
+      const byId = {};
+      a.bookings.forEach((x) => { byId[x.id] = x; });
+      const F = ['status', 'unseen', 'verifiedAt', 'cancelledBy', 'cancelledAt', 'paidRest', 'paidRestAt', 'dpForfeit', 'dpDecision', 'dpPaid', 'note', 'rejectedAt', 'holdUntil'];
+      const list = [];
+      b.bookings.forEach((x) => {
+        const o = byId[x.id];
+        if (!o) return;
+        const set = {};
+        F.forEach((f) => { if (x[f] !== undefined && JSON.stringify(o[f]) !== JSON.stringify(x[f])) set[f] = x[f]; });
+        if (Object.keys(set).length) list.push({ id: x.id, month: String(x.date).slice(0, 7), set: set });
+      });
+      if (list.length) patch.bookings = list;
+      const bl = {};
+      Object.keys(b.blocked).forEach((k) => { if (b.blocked[k] && !a.blocked[k]) bl[k] = true; });
+      Object.keys(a.blocked).forEach((k) => { if (a.blocked[k] && !b.blocked[k]) bl[k] = false; });
+      if (Object.keys(bl).length) patch.blocked = bl;
+    }
+    return Object.keys(patch).length ? patch : null;
+  }
+
+  push(patch) {
+    this._pending++;
+    this._q = this._q.then(async () => {
+      const r = await this.api('POST', '/api/admin/patch', patch);
+      if (!r.ok) this.setState({ syncMsg: 'Perubahan gagal disimpan: ' + r.error + ' Data dimuat ulang dari server.', storeOk: r.status !== 0 });
+      else if (r.data.skipped && r.data.skipped.length) this.setState({ syncMsg: 'Sebagian perubahan dilewati: jadwal booking itu sudah dipakai orang lain.' });
+      else if (this.state.syncMsg) this.setState({ syncMsg: '' });
+    }).catch(() => {}).then(() => {
+      this._pending--;
+      if (this._pending === 0) this.sync(true);
+    });
+  }
+
+  mutate(fn) {
+    const before = this.state.data;
+    const d = JSON.parse(JSON.stringify(before));
+    fn(d);
+    const patch = this.diff(before, d);
+    this.setState({ data: d, tick: Date.now(), prevUnseen: d.bookings.filter((b) => b.unseen).length });
+    this.updateTitle(d.bookings.filter((b) => b.unseen).length);
+    if (patch) this.push(patch);
+    return true;
+  }
+
+  /* ---------- helper umum ---------- */
+  pad(n) { return n < 10 ? '0' + n : '' + n; }
+  dkey(d) { return d.getFullYear() + '-' + this.pad(d.getMonth() + 1) + '-' + this.pad(d.getDate()); }
+  parseKey(k) { const a = String(k).split('-'); return new Date(Number(a[0]), Number(a[1]) - 1, Number(a[2])); }
+  fmt(n) { return 'Rp ' + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+  hh(h) { return this.pad(h) + '.00'; }
+  toInt(v) { const n = parseInt(String(v).replace(/[^0-9]/g, ''), 10); return isNaN(n) ? 0 : n; }
+
+  normPhone(raw) {
+    let p = String(raw || '').replace(/[^0-9]/g, '');
+    if (p.indexOf('0') === 0) p = '62' + p.slice(1);
+    else if (p.indexOf('8') === 0) p = '62' + p;
+    return p;
+  }
+  fmtPhone(p) {
+    if (!p) return '';
+    const l = p.indexOf('62') === 0 ? '0' + p.slice(2) : p;
+    return l.replace(/^(\d{4})(\d{4})(\d+)$/, '$1-$2-$3');
+  }
+
+  sane(raw) {
+    const s = Object.assign({}, raw);
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    s.openHour = clamp(Number(raw.openHour) || 0, 0, 23);
+    s.closeHour = clamp(Number(raw.closeHour) || 0, s.openHour + 1, 24);
+    s.nightFrom = clamp(Number(raw.nightFrom) || 0, s.openHour, s.closeHour);
+    return s;
+  }
+
+  effStatus(b, nowMs) {
+    if (b.status === 'wait' && b.holdUntil < nowMs) return 'expired';
+    return b.status;
+  }
+  isActive(st) { return st === 'wait' || st === 'verify' || st === 'ok'; }
+  takenMap(d, k, nowMs) {
+    const m = {};
+    d.bookings.forEach((b) => {
+      if (b.date !== k) return;
+      if (!this.isActive(this.effStatus(b, nowMs))) return;
+      b.hours.forEach((h) => { m[b.court + '-' + h] = b; });
+    });
+    return m;
+  }
+
+  rangesText(hours) {
+    const sorted = hours.slice().sort((a, b) => a - b);
+    const ranges = [];
+    sorted.forEach((h) => {
+      const last = ranges[ranges.length - 1];
+      if (last && last.end === h) last.end = h + 1; else ranges.push({ start: h, end: h + 1 });
+    });
+    return ranges.map((r) => this.hh(r.start) + '–' + this.hh(r.end)).join(', ');
+  }
+
+  dateLongOf(k) {
+    const dayLong = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const monthLong = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const d = this.parseKey(k);
+    return dayLong[d.getDay()] + ', ' + d.getDate() + ' ' + monthLong[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  readImage(file, maxW, q, cb) {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const r = Math.min(1, maxW / img.width);
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * r));
+        c.height = Math.max(1, Math.round(img.height * r));
+        const g = c.getContext('2d');
+        g.fillStyle = '#FFFFFF';
+        g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(img, 0, 0, c.width, c.height);
+        let out = '';
+        try { out = c.toDataURL('image/jpeg', q); } catch (e) { out = ''; }
+        cb(out);
+      };
+      img.onerror = () => cb('');
+      img.src = fr.result;
+    };
+    fr.onerror = () => cb('');
+    fr.readAsDataURL(file);
+  }
+
+  /* ---------- aksi admin ---------- */
+  markSeen(id) {
+    const b = this.state.data.bookings.find((x) => x.id === id);
+    if (!b || !b.unseen) return;
+    this.mutate((d) => {
+      const t = d.bookings.find((x) => x.id === id);
+      if (t) t.unseen = false;
+    });
+  }
+
+  openBooking(id) {
+    this.markSeen(id);
+    this.setState({ view: 'booking', filter: 'all', query: '', sel: id, notifOpen: false, confirmCancel: false });
+  }
+
+  setStatus(status) {
+    const id = this.state.sel;
+    this.mutate((d) => {
+      const b = d.bookings.find((x) => x.id === id);
+      if (!b) return;
+      b.status = status;
+      b.unseen = false;
+      if (status === 'ok') b.verifiedAt = Date.now();
+    });
+  }
+
+  cancelBooking() {
+    const id = this.state.sel;
+    this.mutate((d) => {
+      const b = d.bookings.find((x) => x.id === id);
+      if (!b || !this.isActive(this.effStatus(b, Date.now()))) return;
+      b.status = 'cancel';
+      b.cancelledBy = 'admin';
+      b.cancelledAt = Date.now();
+      b.unseen = false;
+    });
+    this.setState({ confirmCancel: false });
+  }
+
+  setSetting(key, value) {
+    this.mutate((d) => { d.settings[key] = value; });
+  }
+
+  setCourt(i, key, value) {
+    this.mutate((d) => { d.settings.courts[i][key] = value; });
+  }
+
+  uploadPhoto(e, target) {
+    const f = e && e.target && e.target.files && e.target.files[0];
+    if (!f) return;
+    if (f.type.indexOf('image/') !== 0) { this.setState({ photoMsg: 'File harus berupa gambar (JPG atau PNG).' }); return; }
+    this.readImage(f, target === 'hero' ? 1800 : 1200, 0.8, (url) => {
+      if (!url) { this.setState({ photoMsg: 'Gambar tidak bisa dibaca. Coba foto lain.' }); return; }
+      const ok = this.mutate((d) => {
+        if (target === 'hero') d.settings.heroPhoto = url;
+        else d.settings.courts[target].photo = url;
+      });
+      this.setState({ photoMsg: ok ? '' : 'Penyimpanan browser penuh atau tidak tersedia. Foto hanya tampil sampai halaman ini ditutup.' });
+    });
+  }
+
+  removePhoto(target) {
+    this.mutate((d) => {
+      if (target === 'hero') d.settings.heroPhoto = '';
+      else d.settings.courts[target].photo = '';
+    });
+  }
+
+  /* ---------- scan QR tiket pelanggan ---------- */
+  // Dua bentuk isi QR: "GA1|kode|nama|whatsapp|lapangan|yymmdd|jam|total|dibayar" (detail lengkap)
+  // dan "GOLARENA:kode" atau hanya kode booking (hanya kode).
+  parseQr(text) {
+    const t = String(text || '').trim();
+    if (/^GA1\|/.test(t)) {
+      const f = t.split('|');
+      if (f.length < 9 || !/^GA-[A-Z0-9]{5}$/i.test(f[1]) || !/^\d{6}$/.test(f[5])) return null;
+      const hours = [];
+      String(f[6]).split(',').forEach((r) => {
+        const m = /^(\d{1,2})-(\d{1,2})$/.exec(r);
+        if (!m) return;
+        for (let h = Number(m[1]); h < Number(m[2]) && h < 24; h++) hours.push(h);
+      });
+      const total = Number(f[7]);
+      const paid = Number(f[8]);
+      if (!hours.length || !isFinite(total) || !isFinite(paid) || total <= 0) return null;
+      return {
+        code: f[1].toUpperCase(),
+        detail: { name: f[2], phone: f[3], court: Number(f[4]) || 0, date: '20' + f[5].slice(0, 2) + '-' + f[5].slice(2, 4) + '-' + f[5].slice(4, 6), hours: hours, total: total, paid: paid },
+      };
+    }
+    const m = /^(?:GOLARENA:)?(GA-[A-Z0-9]{5})$/i.exec(t);
+    if (m) return { code: m[1].toUpperCase(), detail: null };
+    return null;
+  }
+
+  handleScanText(text) {
+    this.sync(true);
+    const p = this.parseQr(text);
+    if (!p) {
+      this.setState({ scanRes: null, scanMsg: 'Isi QR tidak dikenali. Pastikan itu QR tiket booking, atau ketik kodenya (contoh GA-4F7K2).' });
+      return false;
+    }
+    this.setState({ scanRes: p, scanMsg: '', scanInput: '' });
+    return true;
+  }
+
+  decodeImageData(data, w, h, mode) {
+    const lib = typeof jsQR !== 'undefined' ? jsQR : (typeof window !== 'undefined' ? window.jsQR : null);
+    if (!lib) return { error: 'lib', text: '' };
+    const r = lib(data, w, h, { inversionAttempts: mode || 'attemptBoth' });
+    return { error: '', text: r && r.data ? r.data : '' };
+  }
+
+  scanFile(e) {
+    const f = e && e.target && e.target.files && e.target.files[0];
+    if (!f) return;
+    if (String(f.type).indexOf('image/') !== 0) { this.setState({ scanMsg: 'File harus berupa gambar (JPG atau PNG).' }); return; }
+    this.setState({ scanMsg: 'Membaca gambar…' });
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let found = '';
+        const sizes = [1000, 1600, 600];
+        for (let i = 0; i < sizes.length && !found; i++) {
+          const r = Math.min(1, sizes[i] / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * r));
+          c.height = Math.max(1, Math.round(img.height * r));
+          const g = c.getContext('2d');
+          g.drawImage(img, 0, 0, c.width, c.height);
+          let id = null;
+          try { id = g.getImageData(0, 0, c.width, c.height); } catch (err) { id = null; }
+          if (!id) break;
+          const res = this.decodeImageData(id.data, c.width, c.height, 'attemptBoth');
+          if (res.error) { this.setState({ scanMsg: 'Pemindai belum termuat. Ketik kode booking saja.' }); return; }
+          found = res.text;
+        }
+        if (!found) { this.setState({ scanRes: null, scanMsg: 'QR code tidak terbaca di gambar ini. Coba foto yang lebih dekat dan terang, atau ketik kodenya.' }); return; }
+        this.handleScanText(found);
+      };
+      img.onerror = () => this.setState({ scanMsg: 'Gambar tidak bisa dibaca. Coba foto lain.' });
+      img.src = fr.result;
+    };
+    fr.onerror = () => this.setState({ scanMsg: 'Gambar tidak bisa dibaca. Coba foto lain.' });
+    fr.readAsDataURL(f);
+  }
+
+  startScan() {
+    this.setState({ scanning: true, scanRes: null, scanMsg: 'Membuka kamera…' });
+    setTimeout(() => this.openCamera(), 60);
+  }
+
+  openCamera() {
+    const md = typeof navigator !== 'undefined' ? navigator.mediaDevices : null;
+    if (!md || !md.getUserMedia) {
+      this.setState({ scanning: false, scanMsg: 'Kamera tidak tersedia di browser ini. Pakai pindai dari foto atau ketik kodenya.' });
+      return;
+    }
+    md.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false }).then((stream) => {
+      const v = document.getElementById('scan-video');
+      if (!this.state.scanning || !v) { stream.getTracks().forEach((tr) => tr.stop()); return; }
+      this._stream = stream;
+      v.muted = true;
+      v.setAttribute('playsinline', 'true');
+      v.srcObject = stream;
+      const p = v.play();
+      if (p && p.catch) p.catch(() => {});
+      this.setState({ scanMsg: 'Arahkan kamera ke QR code pelanggan.' });
+      this.tickScan();
+    }, (err) => {
+      const nm = err && err.name ? err.name : '';
+      const why = nm === 'NotAllowedError' ? 'izin kamera ditolak atau diblokir di halaman ini' : nm === 'NotFoundError' ? 'kamera tidak ditemukan' : 'kamera tidak bisa dibuka';
+      this.setState({ scanning: false, scanMsg: 'Kamera tidak bisa dipakai (' + why + '). Pakai pindai dari foto atau ketik kodenya.' });
+    });
+  }
+
+  tickScan() {
+    if (!this._stream) return;
+    const v = document.getElementById('scan-video');
+    if (v && v.readyState >= 2 && v.videoWidth > 0) {
+      const r = Math.min(1, 720 / v.videoWidth);
+      const c = this._cv || (this._cv = document.createElement('canvas'));
+      c.width = Math.max(1, Math.round(v.videoWidth * r));
+      c.height = Math.max(1, Math.round(v.videoHeight * r));
+      const g = c.getContext('2d');
+      g.drawImage(v, 0, 0, c.width, c.height);
+      let id = null;
+      try { id = g.getImageData(0, 0, c.width, c.height); } catch (err) { id = null; }
+      if (id) {
+        const res = this.decodeImageData(id.data, c.width, c.height, 'dontInvert');
+        if (res.error) { this.stopCamera(); this.setState({ scanMsg: 'Pemindai belum termuat. Ketik kode booking saja.' }); return; }
+        if (res.text) {
+          if (this.parseQr(res.text)) { this.stopCamera(); this.handleScanText(res.text); return; }
+          if (res.text !== this._lastBad) { this._lastBad = res.text; this.setState({ scanMsg: 'QR terbaca, tetapi bukan tiket booking. Arahkan ke QR tiket pelanggan.' }); }
+        }
+      }
+    }
+    this._scanTimer = setTimeout(() => this.tickScan(), 180);
+  }
+
+  stopCamera() {
+    if (this._scanTimer) { clearTimeout(this._scanTimer); this._scanTimer = null; }
+    if (this._stream) { this._stream.getTracks().forEach((tr) => tr.stop()); this._stream = null; }
+    this.setState({ scanning: false });
+  }
+
+  /* ---------- keuangan ---------- */
+  monthLabel(ym) {
+    const names = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const a = String(ym).split('-');
+    return (names[Number(a[1]) - 1] || '') + ' ' + a[0];
+  }
+  shiftMonth(ym, n) {
+    const a = String(ym).split('-').map(Number);
+    const dt = new Date(a[0], a[1] - 1 + n, 1);
+    return dt.getFullYear() + '-' + this.pad(dt.getMonth() + 1);
+  }
+
+  // Aturan pemasukan: booking terkonfirmasi (DP + pelunasan yang dicatat);
+  // booking batal setelah DP diverifikasi hanya dihitung bila admin menandai DP hangus.
+  finance(b, st) {
+    const paid = Number(b.dpPaid) || 0;
+    const restPaid = Number(b.paidRest) || 0;
+    const r = { inReport: false, dpIn: 0, restIn: 0, remain: 0, dpDecision: 'none', label: '', note: '' };
+    if (st === 'ok') {
+      r.inReport = true;
+      r.dpIn = paid;
+      r.restIn = restPaid;
+      r.remain = Math.max(0, b.total - paid - restPaid);
+      r.label = r.remain === 0 ? 'Lunas' : 'DP terverifikasi';
+      r.note = r.remain === 0 ? '' : 'Sisa dibayar di lokasi';
+    } else if (st === 'verify') {
+      r.inReport = true;
+      r.label = 'Menunggu verifikasi';
+      r.note = 'DP ' + this.fmt(paid) + ' belum dihitung';
+    } else if (st === 'cancel' && b.verifiedAt && paid > 0) {
+      r.inReport = true;
+      r.label = 'Dibatalkan';
+      if (b.dpForfeit === true) { r.dpIn = paid; r.dpDecision = 'forfeit'; r.note = 'DP hangus, dihitung pemasukan'; }
+      else if (b.dpForfeit === false) { r.dpDecision = 'refund'; r.note = 'DP dikembalikan'; }
+      else { r.dpDecision = 'pending'; r.note = 'DP belum diputuskan'; }
+    }
+    return r;
+  }
+
+  reportRecords(d, nowMs) {
+    const out = [];
+    d.bookings.forEach((b) => {
+      const st = this.effStatus(b, nowMs);
+      const f = this.finance(b, st);
+      if (!f.inReport) return;
+      const cn = d.settings.courts[b.court] && d.settings.courts[b.court].name ? d.settings.courts[b.court].name : 'Lapangan ' + (b.court + 1);
+      out.push({
+        id: b.id,
+        month: String(b.date).slice(0, 7),
+        date: b.date,
+        firstHour: Math.min.apply(null, b.hours),
+        hours: b.hours.slice().sort((x, y) => x - y),
+        durasi: b.hours.length,
+        code: b.code,
+        name: b.name,
+        phone: b.phone,
+        courtIdx: b.court,
+        court: cn,
+        st: st,
+        label: f.label,
+        note: f.note,
+        total: b.total,
+        paidDp: Number(b.dpPaid) || 0,
+        dpIn: f.dpIn,
+        restIn: f.restIn,
+        income: f.dpIn + f.restIn,
+        remain: f.remain,
+        dpDecision: f.dpDecision,
+      });
+    });
+    out.sort((a, b) => (a.date + this.pad(a.firstHour) < b.date + this.pad(b.firstHour) ? -1 : a.date + this.pad(a.firstHour) > b.date + this.pad(b.firstHour) ? 1 : 0));
+    return out;
+  }
+
+  setRestPaid(id, on) {
+    this.mutate((d) => {
+      const b = d.bookings.find((x) => x.id === id);
+      if (!b || b.status !== 'ok') return;
+      if (on) {
+        b.paidRest = Math.max(0, b.total - (Number(b.dpPaid) || 0));
+        b.paidRestAt = Date.now();
+      } else {
+        b.paidRest = 0;
+        b.paidRestAt = 0;
+      }
+    });
+  }
+
+  setDpDecision(id, forfeit) {
+    this.mutate((d) => {
+      const b = d.bookings.find((x) => x.id === id);
+      if (!b || b.status !== 'cancel') return;
+      b.dpForfeit = forfeit;
+    });
+  }
+
+  /* ---------- Excel (.xlsx) tanpa library ---------- */
+  xmlEsc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  colName(i) {
+    let s = '';
+    let n = i + 1;
+    while (n > 0) {
+      const m = (n - 1) % 26;
+      s = String.fromCharCode(65 + m) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  }
+  crc32(bytes) {
+    if (!this._crcT) {
+      const t = [];
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+        t.push(c >>> 0);
+      }
+      this._crcT = t;
+    }
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) c = this._crcT[(c ^ bytes[i]) & 255] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  zipStore(files, nowMs) {
+    const enc = new TextEncoder();
+    const dt = new Date(nowMs);
+    const dosTime = (dt.getHours() << 11) | (dt.getMinutes() << 5) | (dt.getSeconds() >> 1);
+    const dosDate = ((dt.getFullYear() - 1980) << 9) | ((dt.getMonth() + 1) << 5) | dt.getDate();
+    const u16 = (v) => [v & 255, (v >>> 8) & 255];
+    const u32 = (v) => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+    const parts = [];
+    const central = [];
+    let offset = 0;
+    files.forEach((f) => {
+      const name = enc.encode(f.name);
+      const data = enc.encode(f.data);
+      const crc = this.crc32(data);
+      const head = Uint8Array.from([].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0)));
+      parts.push(head, name, data);
+      central.push({ name: name, crc: crc, size: data.length, offset: offset });
+      offset += head.length + name.length + data.length;
+    });
+    const cdStart = offset;
+    central.forEach((c) => {
+      const h = Uint8Array.from([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(dosTime), u16(dosDate), u32(c.crc), u32(c.size), u32(c.size), u16(c.name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(c.offset)));
+      parts.push(h, c.name);
+      offset += h.length + c.name.length;
+    });
+    const cdSize = offset - cdStart;
+    parts.push(Uint8Array.from([].concat(u32(0x06054b50), u16(0), u16(0), u16(central.length), u16(central.length), u32(cdSize), u32(cdStart), u16(0))));
+    let total = 0;
+    parts.forEach((p) => { total += p.length; });
+    const out = new Uint8Array(total);
+    let pos = 0;
+    parts.forEach((p) => { out.set(p, pos); pos += p.length; });
+    return out;
+  }
+  sheetXml(rows, widths, freezeRows) {
+    let x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+    x += '<sheetViews><sheetView workbookViewId="0">';
+    if (freezeRows) x += '<pane ySplit="' + freezeRows + '" topLeftCell="A' + (freezeRows + 1) + '" activePane="bottomLeft" state="frozen"/>';
+    x += '</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>';
+    widths.forEach((w, i) => { x += '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; });
+    x += '</cols><sheetData>';
+    rows.forEach((row, ri) => {
+      x += '<row r="' + (ri + 1) + '">';
+      row.forEach((c, ci) => {
+        if (c === null || c === undefined) return;
+        const ref = this.colName(ci) + (ri + 1);
+        const s = c.s ? ' s="' + c.s + '"' : '';
+        if (c.f !== undefined) x += '<c r="' + ref + '"' + s + '><f>' + this.xmlEsc(c.f) + '</f><v>' + c.v + '</v></c>';
+        else if (typeof c.v === 'number') x += '<c r="' + ref + '"' + s + '><v>' + c.v + '</v></c>';
+        else x += '<c r="' + ref + '"' + s + ' t="inlineStr"><is><t xml:space="preserve">' + this.xmlEsc(c.v) + '</t></is></c>';
+      });
+      x += '</row>';
+    });
+    x += '</sheetData></worksheet>';
+    return x;
+  }
+
+  // scope: 'month' (bulan terpilih) atau 'all' (semua bulan)
+  buildWorkbook(scope, ym, nowMs) {
+    const d = this.state.data;
+    const brand = (d.settings.name || '').trim() || 'Gol Arena Futsal';
+    const all = this.reportRecords(d, nowMs);
+    const recs = scope === 'all' ? all : all.filter((r) => r.month === ym);
+    const n = recs.length;
+    const last = Math.max(2, n + 1);
+    const T = (v, s) => ({ v: String(v), s: s || 0 });
+    const Nn = (v, s) => ({ v: Number(v) || 0, s: s || 0 });
+    const F = (f, v, s) => ({ f: f, v: Number(v) || 0, s: s || 0 });
+    const serial = (k) => { const a = k.split('-').map(Number); return Math.round((Date.UTC(a[0], a[1] - 1, a[2]) - Date.UTC(1899, 11, 30)) / 86400000); };
+    const sum = (arr, k) => arr.reduce((t, r) => t + r[k], 0);
+    const isOk = (r) => r.st === 'ok';
+    const rng = (col) => 'Transaksi!$' + col + '$2:$' + col + '$' + last;
+
+    // ---- sheet Transaksi ----
+    const head = ['Bulan', 'Tanggal main', 'Jam', 'Durasi (jam)', 'Kode', 'Nama pemesan', 'WhatsApp', 'Lapangan', 'Status', 'Total tagihan', 'DP masuk', 'Pelunasan', 'Pemasukan', 'Sisa belum dibayar', 'Catatan'];
+    const tx = [head.map((h) => T(h, 1))];
+    recs.forEach((r, i) => {
+      const row = i + 2;
+      tx.push([T(r.month), Nn(serial(r.date), 3), T(this.rangesText(r.hours)), Nn(r.durasi), T(r.code), T(r.name), T(this.fmtPhone(r.phone)), T(r.court), T(r.label), Nn(r.total, 2), Nn(r.dpIn, 2), Nn(r.restIn, 2), F('K' + row + '+L' + row, r.income, 2), Nn(r.remain, 2), T(r.note)]);
+    });
+    tx.push([]);
+    tx.push([T('Total', 5), null, null, null, null, null, null, null, null, null,
+      F('SUM(K2:K' + last + ')', sum(recs, 'dpIn'), 6),
+      F('SUM(L2:L' + last + ')', sum(recs, 'restIn'), 6),
+      F('SUM(M2:M' + last + ')', sum(recs, 'income'), 6),
+      F('SUM(N2:N' + last + ')', sum(recs, 'remain'), 6)]);
+    const txWidths = [10, 14, 14, 12, 11, 22, 16, 14, 20, 16, 14, 14, 16, 18, 34];
+    const sheets = [];
+
+    if (scope === 'all') {
+      const months = [];
+      recs.forEach((r) => { if (months.indexOf(r.month) === -1) months.push(r.month); });
+      months.sort();
+      const rk = [['Bulan', 'Nama bulan', 'Jumlah booking', 'Jam bermain', 'DP masuk', 'Pelunasan', 'Pemasukan', 'Sisa belum dibayar'].map((h) => T(h, 1))];
+      months.forEach((m, i) => {
+        const row = i + 2;
+        const mr = recs.filter((r) => r.month === m);
+        const ok = mr.filter(isOk);
+        const cnt = 'COUNTIFS(' + rng('A') + ',$A' + row + ',' + rng('I') + ',"Lunas")+COUNTIFS(' + rng('A') + ',$A' + row + ',' + rng('I') + ',"DP terverifikasi")';
+        const hrs = 'SUMIFS(' + rng('D') + ',' + rng('A') + ',$A' + row + ',' + rng('I') + ',"Lunas")+SUMIFS(' + rng('D') + ',' + rng('A') + ',$A' + row + ',' + rng('I') + ',"DP terverifikasi")';
+        rk.push([T(m), T(this.monthLabel(m)), F(cnt, ok.length), F(hrs, sum(ok, 'durasi')),
+          F('SUMIFS(' + rng('K') + ',' + rng('A') + ',$A' + row + ')', sum(mr, 'dpIn'), 2),
+          F('SUMIFS(' + rng('L') + ',' + rng('A') + ',$A' + row + ')', sum(mr, 'restIn'), 2),
+          F('SUMIFS(' + rng('M') + ',' + rng('A') + ',$A' + row + ')', sum(mr, 'income'), 2),
+          F('SUMIFS(' + rng('N') + ',' + rng('A') + ',$A' + row + ')', sum(mr, 'remain'), 2)]);
+      });
+      const lr = Math.max(2, months.length + 1);
+      rk.push([]);
+      rk.push([T('Total', 5), null,
+        F('SUM(C2:C' + lr + ')', recs.filter(isOk).length, 5),
+        F('SUM(D2:D' + lr + ')', sum(recs.filter(isOk), 'durasi'), 5),
+        F('SUM(E2:E' + lr + ')', sum(recs, 'dpIn'), 6),
+        F('SUM(F2:F' + lr + ')', sum(recs, 'restIn'), 6),
+        F('SUM(G2:G' + lr + ')', sum(recs, 'income'), 6),
+        F('SUM(H2:H' + lr + ')', sum(recs, 'remain'), 6)]);
+      sheets.push({ name: 'Rekap bulanan', xml: this.sheetXml(rk, [10, 18, 16, 14, 16, 16, 16, 20], 1) });
+    } else {
+      const ok = recs.filter(isOk);
+      const cnt = 'COUNTIF(' + rng('I') + ',"Lunas")+COUNTIF(' + rng('I') + ',"DP terverifikasi")';
+      const hrs = 'SUMIF(' + rng('I') + ',"Lunas",' + rng('D') + ')+SUMIF(' + rng('I') + ',"DP terverifikasi",' + rng('D') + ')';
+      const pend = sum(recs.filter((r) => r.st === 'verify'), 'paidDp');
+      const sm = [
+        [T(brand + ' - Laporan keuangan', 4)],
+        [T('Periode', 5), T(this.monthLabel(ym))],
+        [T('Dibuat', 5), T(this.dateLongOf(this.dkey(new Date(nowMs))))],
+        [],
+        [T('Keterangan', 1), T('Jumlah', 1)],
+        [T('Pemasukan diterima'), F('SUM(' + rng('M') + ')', sum(recs, 'income'), 6)],
+        [T('DP masuk'), F('SUM(' + rng('K') + ')', sum(recs, 'dpIn'), 2)],
+        [T('Pelunasan di lokasi'), F('SUM(' + rng('L') + ')', sum(recs, 'restIn'), 2)],
+        [T('Sisa belum dibayar'), F('SUM(' + rng('N') + ')', sum(recs, 'remain'), 2)],
+        [T('Jumlah booking terkonfirmasi'), F(cnt, ok.length)],
+        [T('Jam bermain (booking terkonfirmasi)'), F(hrs, sum(ok, 'durasi'))],
+        [T('DP menunggu verifikasi (belum dihitung)'), Nn(pend, 2)],
+        [],
+        [T('Lapangan', 1), T('Pemasukan', 1), T('Jam bermain', 1)],
+      ];
+      [0, 1, 2].forEach((ci) => {
+        const nm = d.settings.courts[ci] && d.settings.courts[ci].name ? d.settings.courts[ci].name : 'Lapangan ' + (ci + 1);
+        const cr = recs.filter((r) => r.courtIdx === ci);
+        const row = sm.length + 1;
+        sm.push([T(nm),
+          F('SUMIF(' + rng('H') + ',$A' + row + ',' + rng('M') + ')', sum(cr, 'income'), 2),
+          F('SUMIFS(' + rng('D') + ',' + rng('H') + ',$A' + row + ',' + rng('I') + ',"Lunas")+SUMIFS(' + rng('D') + ',' + rng('H') + ',$A' + row + ',' + rng('I') + ',"DP terverifikasi")', sum(cr.filter(isOk), 'durasi'))]);
+      });
+      sm.push([]);
+      sm.push([T('Dihitung per bulan tanggal main. DP booking yang dibatalkan hanya dihitung jika ditandai hangus.')]);
+      sheets.push({ name: 'Ringkasan', xml: this.sheetXml(sm, [40, 20, 16], 0) });
+    }
+    sheets.push({ name: 'Transaksi', xml: this.sheetXml(tx, txWidths, 1) });
+
+    const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
+    const RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+    const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="' + NS + '">'
+      + '<numFmts count="2"><numFmt numFmtId="164" formatCode="&quot;Rp &quot;#,##0"/><numFmt numFmtId="165" formatCode="dd/mm/yyyy"/></numFmts>'
+      + '<fonts count="4"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font></fonts>'
+      + '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0C2B20"/><bgColor indexed="64"/></patternFill></fill></fills>'
+      + '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+      + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+      + '<cellXfs count="7">'
+      + '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+      + '<xf numFmtId="0" fontId="2" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'
+      + '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+      + '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+      + '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+      + '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+      + '<xf numFmtId="164" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyNumberFormat="1"/>'
+      + '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+    const files = [];
+    files.push({ name: '[Content_Types].xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' + sheets.map((s, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('') + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' });
+    files.push({ name: '_rels/.rels', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' });
+    files.push({ name: 'xl/workbook.xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="' + NS + '" xmlns:r="' + RNS + '"><sheets>' + sheets.map((s, i) => '<sheet name="' + this.xmlEsc(s.name) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>').join('') + '</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>' });
+    files.push({ name: 'xl/_rels/workbook.xml.rels', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' + sheets.map((s, i) => '<Relationship Id="rId' + (i + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>').join('') + '<Relationship Id="rId' + (sheets.length + 1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' });
+    files.push({ name: 'xl/styles.xml', data: styles });
+    sheets.forEach((s, i) => { files.push({ name: 'xl/worksheets/sheet' + (i + 1) + '.xml', data: s.xml }); });
+    return this.zipStore(files, nowMs);
+  }
+
+  exportXlsx(scope) {
+    const nowMs = Date.now();
+    const ym = this.state.reportMonth || this.dkey(new Date(nowMs)).slice(0, 7);
+    const filename = scope === 'all' ? 'laporan-keuangan-semua-bulan.xlsx' : 'laporan-keuangan-' + ym + '.xlsx';
+    let bytes = null;
+    try {
+      bytes = this.buildWorkbook(scope, ym, nowMs);
+    } catch (e) {
+      this.setState({ exportMsg: 'File Excel gagal dibuat: ' + (e && e.message ? e.message : 'kesalahan tidak diketahui') + '.' });
+      return;
+    }
+    const viaLink = () => {
+      try {
+        const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        this.setState({ exportMsg: 'Unduhan ' + filename + ' dimulai. Kalau tidak muncul, browser mungkin memblokirnya di halaman ini.' });
+      } catch (e) {
+        this.setState({ exportMsg: 'Browser tidak mengizinkan unduhan dari halaman ini.' });
+      }
+    };
+    const cl = typeof window !== 'undefined' ? window.claude : null;
+    if (cl && typeof cl.use === 'function') {
+      this.setState({ exportMsg: 'Menyiapkan ' + filename + '…' });
+      Promise.resolve(cl.use('downloads')).then((dl) => {
+        if (!dl) { viaLink(); return null; }
+        return dl.save({ filename: filename, data: bytes }).then(() => {
+          this.setState({ exportMsg: filename + ' sudah disimpan.' });
+        }, (err) => {
+          if (err && err.code === 'declined') this.setState({ exportMsg: 'Unduhan dibatalkan.' });
+          else viaLink();
+        });
+      }, () => viaLink());
+    } else {
+      viaLink();
+    }
+  }
+
+  renderVals() {
+    const accent = this.props.accent ?? '#C9F23C';
+    const S = this.state;
+    const d = S.data;
+    const raw = d.settings;
+    const s = this.sane(raw);
+    const view = S.view;
+    const nowMs = S.tick;
+    const now = new Date(nowMs);
+    const todayKey = this.dkey(now);
+    const fmt = (n) => this.fmt(n);
+    const hh = (h) => this.hh(h);
+    const dayShort = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const monthLong = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const dayLong = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const cname = (i) => (raw.courts[i] && raw.courts[i].name ? raw.courts[i].name : 'Lapangan ' + (i + 1));
+    const brandName = (raw.name || '').trim() || 'Gol Arena Futsal';
+    const ago = (ms) => {
+      const m = Math.max(0, Math.round((nowMs - ms) / 60000));
+      if (m < 1) return 'Baru saja';
+      if (m < 60) return m + ' menit lalu';
+      if (m < 1440) return Math.round(m / 60) + ' jam lalu';
+      return Math.round(m / 1440) + ' hari lalu';
+    };
+    const ON_DARK = 'background:#0C2B20;color:' + accent + ';border-color:#0C2B20;';
+    const OFF_LIGHT = 'background:#FFFFFF;color:#10261C;border-color:#8A968D;';
+
+    // ---- data bersama ----
+    const GREEN = 'background:#CDEFD9;color:#0F4A2A;';
+    const YELLOW = 'background:#FFE9A8;color:#4F3A00;';
+    const GREY = 'background:#E4E1D8;color:#2F3B34;';
+    const RED = 'background:#FAD4D0;color:#7A1E16;';
+    const calc = d.bookings.map((b) => {
+      const st = this.effStatus(b, nowMs);
+      const fin = this.finance(b, st);
+      const lastH = Math.max.apply(null, b.hours);
+      const past = this.parseKey(b.date).getTime() + (lastH + 1) * 3600000 < nowMs;
+      let kind = 'active';
+      if (st === 'cancel') kind = 'cancel';
+      else if (st === 'rej') kind = 'rej';
+      else if (st === 'expired') kind = 'expired';
+      else if (past && st === 'ok') kind = 'done';
+      else if (past) kind = 'lapse';
+      let label = '';
+      let css = GREY;
+      let note = '';
+      if (kind === 'active') {
+        if (st === 'wait') { label = 'Menunggu transfer'; css = GREY; }
+        else if (st === 'verify') { label = 'Perlu verifikasi'; css = YELLOW; }
+        else { label = fin.remain === 0 ? 'Lunas' : 'DP terverifikasi'; css = GREEN; }
+      } else if (kind === 'done') { label = 'Selesai'; css = GREEN; note = fin.remain === 0 ? 'Lunas' : 'Sisa ' + fmt(fin.remain) + ' belum dicatat'; }
+      else if (kind === 'cancel') { label = 'Dibatalkan'; css = GREY; note = b.cancelledBy === 'admin' ? 'Dibatalkan admin' : 'Dibatalkan pelanggan'; }
+      else if (kind === 'rej') { label = 'Bukti ditolak'; css = RED; note = 'Slot dilepas'; }
+      else if (kind === 'expired') { label = 'Kedaluwarsa'; css = GREY; note = 'Tidak bayar tepat waktu'; }
+      else { label = 'Tidak diverifikasi'; css = GREY; note = 'Jadwal sudah lewat'; }
+      const eventAt = st === 'cancel' ? (b.cancelledAt || 0) : (b.proofAt || 0);
+      const hasProof = !!(b.proof || b.hasProof);
+      const paid = b.dpPaid || 0;
+      const waText = 'Halo ' + b.name + ', ini admin ' + brandName + '. Soal booking ' + b.code + ' (' + cname(b.court) + ', ' + this.dateLongOf(b.date) + ', ' + this.rangesText(b.hours) + ').';
+      return {
+        id: b.id,
+        code: b.code,
+        name: b.name,
+        phoneText: this.fmtPhone(b.phone),
+        court: cname(b.court),
+        courtIdx: b.court,
+        date: b.date,
+        firstHour: Math.min.apply(null, b.hours),
+        st: st,
+        kind: kind,
+        unseen: !!b.unseen,
+        eventAt: eventAt,
+        dpPaid: paid,
+        total: b.total,
+        statusLabel: label,
+        badgeCss: css,
+        note: note,
+        dateText: b.date === todayKey ? 'Hari ini' : dayShort[this.parseKey(b.date).getDay()] + ', ' + this.parseKey(b.date).getDate() + ' ' + monthShort[this.parseKey(b.date).getMonth()],
+        dateLong: this.dateLongOf(b.date),
+        timeText: this.rangesText(b.hours),
+        totalText: fmt(b.total),
+        dpLine: st === 'wait' || st === 'expired' ? 'DP belum dibayar' : paid > 0 ? 'DP ' + fmt(paid) : '–',
+        paidText: paid > 0 ? fmt(paid) : 'Belum ada',
+        remainText: st === 'ok' ? fmt(fin.remain) : st === 'verify' && paid > 0 ? fmt(b.total - paid) : '–',
+        agoText: st === 'wait'
+          ? 'Ditahan sampai ' + this.pad(new Date(b.holdUntil).getHours()) + '.' + this.pad(new Date(b.holdUntil).getMinutes())
+          : hasProof ? 'Bukti ' + ago(b.proofAt) : 'Dibuat ' + ago(b.createdAt),
+        proofAgo: hasProof ? ago(b.proofAt) : '',
+        proof: b.proof || this._proofs[b.id] || '',
+        hasProof: hasProof,
+        noProof: !hasProof,
+        isVerify: st === 'verify',
+        isOk: st === 'ok',
+        isRej: st === 'rej',
+        isCancel: st === 'cancel',
+        cancelNote: st === 'cancel' ? (b.cancelledBy === 'admin' ? 'Booking dibatalkan oleh admin. Slot sudah tersedia lagi.' : 'Booking dibatalkan oleh pelanggan. Slot sudah tersedia lagi.') : '',
+        canCancel: st === 'wait' || st === 'verify' || st === 'ok',
+        waUrl: 'https://wa.me/' + b.phone + '?text=' + encodeURIComponent(waText),
+        sortKey: b.date + '-' + this.pad(Math.min.apply(null, b.hours)),
+        month: String(b.date).slice(0, 7),
+        inReport: fin.inReport,
+        income: fin.dpIn + fin.restIn,
+        finRemain: fin.remain,
+        canMarkPaid: st === 'ok' && fin.remain > 0,
+        isPaidFull: st === 'ok' && fin.remain === 0 && (Number(b.paidRest) || 0) > 0,
+        markPaid: () => this.setRestPaid(b.id, true),
+        unmarkPaid: () => this.setRestPaid(b.id, false),
+        hasDpDecision: fin.dpDecision !== 'none',
+        dpDecisionText: 'DP ' + fmt(paid) + ' sudah diterima sebelum booking ini dibatalkan. ' + (fin.dpDecision === 'forfeit' ? 'Ditandai hangus dan dihitung sebagai pemasukan.' : fin.dpDecision === 'refund' ? 'Ditandai dikembalikan ke pelanggan, tidak dihitung sebagai pemasukan.' : 'Tentukan apakah DP hangus atau dikembalikan.'),
+        forfeitDp: () => this.setDpDecision(b.id, true),
+        refundDp: () => this.setDpDecision(b.id, false),
+        forfeitPressed: fin.dpDecision === 'forfeit',
+        refundPressed: fin.dpDecision === 'refund',
+        forfeitCss: fin.dpDecision === 'forfeit' ? 'background:#0C2B20;color:' + accent + ';border-color:#0C2B20;' : 'background:#FFFFFF;color:#10261C;border-color:#8A968D;',
+        refundCss: fin.dpDecision === 'refund' ? 'background:#0C2B20;color:' + accent + ';border-color:#0C2B20;' : 'background:#FFFFFF;color:#10261C;border-color:#8A968D;',
+      };
+    });
+    const active = calc.filter((b) => b.kind === 'active').sort((a, b) => (a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0));
+    const history = calc.filter((b) => b.kind !== 'active').sort((a, b) => (a.sortKey < b.sortKey ? 1 : a.sortKey > b.sortKey ? -1 : 0));
+    const countAct = (st) => active.filter((b) => b.st === st).length;
+
+    // ---- notifikasi ----
+    const unseen = calc.filter((b) => b.unseen).sort((a, b) => b.eventAt - a.eventAt);
+    const top = unseen[0];
+    const evTitle = (b) => (b.st === 'cancel' ? b.name + ' membatalkan booking' : b.name + ' sudah transfer ' + fmt(b.dpPaid));
+    const notifs = unseen.map((b) => ({
+      title: evTitle(b),
+      detail: b.court + ' · ' + b.dateText + ' · ' + b.timeText,
+      ago: ago(b.eventAt),
+      view: () => this.openBooking(b.id),
+    }));
+
+    // ---- navigasi ----
+    const needVerify = countAct('verify');
+    const navDefs = [['booking', 'Booking', needVerify], ['jadwal', 'Jadwal lapangan', 0], ['scan', 'Scan QR', 0], ['riwayat', 'Riwayat', 0], ['laporan', 'Laporan', 0], ['pengaturan', 'Pengaturan', 0]];
+    const navItems = navDefs.map((n) => {
+      const on = view === n[0];
+      return {
+        label: n[1],
+        current: on ? 'page' : 'false',
+        hasBadge: n[2] > 0,
+        badge: String(n[2]),
+        css: on ? 'background:#133A2B;color:' + accent + ';' : 'background:transparent;color:#F3F5EE;',
+        go: () => { if (this._stream || this.state.scanning) this.stopCamera(); this.setState({ view: n[0], notifOpen: false, confirmCancel: false, confirmReset: '' }); },
+      };
+    });
+
+    // ---- tab booking ----
+    const q = (S.query || '').trim().toLowerCase();
+    const qDigits = q.replace(/[^0-9]/g, '');
+    const tabDefs = [['all', 'Semua', active.length], ['verify', 'Perlu verifikasi', countAct('verify')], ['wait', 'Menunggu transfer', countAct('wait')], ['ok', 'Terverifikasi', countAct('ok')]];
+    const tabs = tabDefs.map((t) => {
+      const on = S.filter === t[0];
+      return { label: t[1], count: t[2], pressed: on, css: on ? ON_DARK : OFF_LIGHT, pick: () => this.setState({ filter: t[0] }) };
+    });
+    const visible = active.filter((b) => {
+      if (S.filter !== 'all' && b.st !== S.filter) return false;
+      if (q && b.name.toLowerCase().indexOf(q) === -1 && b.code.toLowerCase().indexOf(q) === -1 && !(qDigits && b.phoneText.replace(/[^0-9]/g, '').indexOf(qDigits) !== -1)) return false;
+      return true;
+    });
+    const rows = visible.map((b) => {
+      const on = b.id === S.sel;
+      return Object.assign({}, b, {
+        pressed: on,
+        css: on ? 'background:#E6EEDC;border-color:#0C2B20;' : 'background:#FFFFFF;border-color:#D9D6CB;',
+        pick: () => { this.markSeen(b.id); this.setState({ sel: b.id, confirmCancel: false }); },
+      });
+    });
+    const emptyCur = { badgeCss: '', statusLabel: '', name: '', code: '', phoneText: '', court: '', dateLong: '', timeText: '', totalText: '', dpLine: '', remainText: '', waUrl: '', hasProof: false, noProof: true, proof: '', proofAgo: '', isVerify: false, isOk: false, isRej: false, isCancel: false, cancelNote: '', canCancel: false, canMarkPaid: false, isPaidFull: false, markPaid: () => {}, unmarkPaid: () => {}, hasDpDecision: false, dpDecisionText: '', forfeitDp: () => {}, refundDp: () => {}, forfeitPressed: false, refundPressed: false, forfeitCss: '', refundCss: '' };
+    const curFound = calc.find((b) => b.id === S.sel);
+    const cur = curFound || emptyCur;
+
+    // ---- tab jadwal ----
+    const days = [];
+    for (let i = 0; i < 14; i++) {
+      const dt = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+      const on = i === S.dayIdx;
+      days.push({
+        key: this.dkey(dt),
+        dow: i === 0 ? 'Hari ini' : dayShort[dt.getDay()],
+        num: String(dt.getDate()),
+        mon: monthShort[dt.getMonth()],
+        pressed: on,
+        css: on ? ON_DARK : OFF_LIGHT,
+        pick: () => this.setState({ dayIdx: i, selKey: '' }),
+      });
+    }
+    const dayKey = days[S.dayIdx].key;
+    const bookMap = {};
+    const taken = this.takenMap(d, dayKey, nowMs);
+    Object.keys(taken).forEach((k) => { bookMap[k] = calc.find((c) => c.id === taken[k].id); });
+    const cells = [];
+    let nBooked = 0, nPending = 0, nBlocked = 0, nFree = 0;
+    for (let h = s.openHour; h < s.closeHour; h++) {
+      cells.push({ isTime: true, isCell: false, label: hh(h), title: '', sub: '', css: '', aria: '', disabled: false, pressed: false, pick: () => {} });
+      for (let c = 0; c < 3; c++) {
+        const key = c + '-' + h;
+        const bk = bookMap[key];
+        const isBlocked = !!d.blocked[dayKey + '|' + c + '|' + h];
+        const isPast = dayKey === todayKey && h <= now.getHours();
+        const on = S.selKey === key;
+        let title = 'Kosong';
+        let sub = '';
+        let css = 'background:#FFFFFF;color:#3F5247;border-color:#C5CBC2;border-style:solid;cursor:pointer;';
+        let aria = cname(c) + ', ' + hh(h) + ', kosong';
+        let disabled = false;
+        if (bk) {
+          title = bk.name;
+          sub = bk.statusLabel;
+          aria = cname(c) + ', ' + hh(h) + ', ' + bk.name + ', ' + bk.statusLabel;
+          nBooked++;
+          if (bk.st !== 'ok') nPending++;
+          if (bk.st === 'ok') css = 'background:#0C2B20;color:' + accent + ';border-color:#0C2B20;border-style:solid;cursor:pointer;';
+          else if (bk.st === 'verify') css = 'background:#FFE9A8;color:#4F3A00;border-color:#E0C25A;border-style:solid;cursor:pointer;';
+          else css = 'background:#E4E1D8;color:#2F3B34;border-color:#5A675F;border-style:dashed;cursor:pointer;';
+        } else if (isBlocked) {
+          title = 'Ditutup';
+          aria = cname(c) + ', ' + hh(h) + ', ditutup';
+          nBlocked++;
+          css = 'background:#C5CBC2;color:#1F2A24;border-color:#7C897F;border-style:solid;cursor:pointer;';
+        } else if (isPast) {
+          title = 'Lewat';
+          aria = cname(c) + ', ' + hh(h) + ', sudah lewat';
+          disabled = true;
+          css = 'background:#F3F1EA;color:#55605A;border-color:#E4E1D8;border-style:solid;cursor:not-allowed;';
+        } else {
+          nFree++;
+        }
+        if (on) css += 'box-shadow:0 0 0 2px #F3F1EA,0 0 0 4px #10261C;';
+        cells.push({ isTime: false, isCell: true, label: '', title: title, sub: sub, css: css, aria: aria, disabled: disabled, pressed: on, pick: () => this.setState({ selKey: key }) });
+      }
+    }
+    let dTitle = '';
+    let selBooking = null;
+    let dBlockedFlag = false;
+    let dFreeFlag = false;
+    if (S.selKey) {
+      const parts = S.selKey.split('-');
+      const cc = Number(parts[0]);
+      const hr = Number(parts[1]);
+      dTitle = cname(cc) + ' · ' + hh(hr) + '–' + hh(hr + 1);
+      selBooking = bookMap[S.selKey] || null;
+      dBlockedFlag = !selBooking && !!d.blocked[dayKey + '|' + cc + '|' + hr];
+      dFreeFlag = !selBooking && !dBlockedFlag;
+    }
+
+    // ---- tab riwayat ----
+    const groupOf = (b) => (b.kind === 'done' ? 'done' : b.kind === 'cancel' ? 'cancel' : b.kind === 'rej' ? 'rej' : 'expired');
+    const hCount = (g) => history.filter((b) => groupOf(b) === g).length;
+    const hTabDefs = [['all', 'Semua', history.length], ['done', 'Selesai', hCount('done')], ['cancel', 'Dibatalkan', hCount('cancel')], ['rej', 'Ditolak', hCount('rej')], ['expired', 'Kedaluwarsa', hCount('expired')]];
+    const htabs = hTabDefs.map((t) => {
+      const on = S.hfilter === t[0];
+      return { label: t[1], count: t[2], pressed: on, css: on ? ON_DARK : OFF_LIGHT, pick: () => this.setState({ hfilter: t[0] }) };
+    });
+    const hq = (S.hquery || '').trim().toLowerCase();
+    const hrows = history.filter((b) => {
+      if (S.hfilter !== 'all' && groupOf(b) !== S.hfilter) return false;
+      if (hq && b.name.toLowerCase().indexOf(hq) === -1 && b.code.toLowerCase().indexOf(hq) === -1) return false;
+      return true;
+    });
+
+    // ---- tab pengaturan ----
+    const BLANK = { isHeading: false, isInput: false, isArea: false, isNote: false, id: '', label: '', hint: '', type: 'text', value: '', change: () => {} };
+    const mk = (o) => Object.assign({}, BLANK, o);
+    const H = (label) => mk({ isHeading: true, label: label });
+    const T = (key, label, hint, type) => mk({
+      isInput: true, id: 'f-' + key, label: label, hint: hint || '', type: type || 'text',
+      value: String(raw[key] === undefined || raw[key] === null ? '' : raw[key]),
+      change: (e) => this.setSetting(key, e && e.target ? e.target.value : ''),
+    });
+    const N = (key, label, hint) => mk({
+      isInput: true, id: 'f-' + key, label: label, hint: hint || '', type: 'number',
+      value: String(raw[key] === undefined || raw[key] === null ? 0 : raw[key]),
+      change: (e) => this.setSetting(key, this.toInt(e && e.target ? e.target.value : 0)),
+    });
+    const A = (key, label, hint) => mk({
+      isArea: true, id: 'f-' + key, label: label, hint: hint || '',
+      value: String(raw[key] || ''),
+      change: (e) => this.setSetting(key, e && e.target ? e.target.value : ''),
+    });
+    const C = (i, key, label, hint) => mk({
+      isInput: true, id: 'f-court-' + i + '-' + key, label: label, hint: hint || '',
+      value: String(raw.courts[i][key] || ''),
+      change: (e) => this.setCourt(i, key, e && e.target ? e.target.value : ''),
+    });
+    const rOpen = Number(raw.openHour);
+    const rClose = Number(raw.closeHour);
+    const rNight = Number(raw.nightFrom);
+    const hoursOk = rOpen >= 0 && rOpen <= 23 && rClose > rOpen && rClose <= 24 && rNight >= rOpen && rNight <= rClose;
+    const settingFields = [
+      H('Info usaha'),
+      T('name', 'Nama usaha', 'Tampil di header dan footer halaman pelanggan.'),
+      T('address', 'Alamat dan kode lokasi', 'Dipakai untuk tombol Google Maps. Contoh: 4HG6+GR4 Cibabat, Kota Cimahi, Jawa Barat'),
+      T('whatsapp', 'Nomor WhatsApp admin', 'Tombol Chat via WhatsApp mengarah ke nomor ini.', 'tel'),
+      T('instagram', 'Instagram (opsional)', 'Isi nama akun, contoh: golarenafutsal. Kosongkan untuk menyembunyikan.'),
+      H('Rekening untuk transfer DP'),
+      T('bankName', 'Nama bank', 'Tampil di langkah pembayaran DP.'),
+      T('bankNumber', 'Nomor rekening', ''),
+      T('bankHolder', 'Atas nama', ''),
+      H('Jam operasional'),
+      N('openHour', 'Jam buka (0–23)', 'Contoh: 8 untuk 08.00.'),
+      N('closeHour', 'Jam tutup (1–24)', 'Contoh: 22 untuk 22.00. Slot terakhir mulai satu jam sebelumnya.'),
+      N('nightFrom', 'Tarif malam mulai jam', 'Contoh: 17 untuk mulai 17.00.'),
+    ];
+    if (!hoursOk) settingFields.push(mk({ isNote: true, label: 'Jam operasional belum valid. Jam tutup harus lebih besar dari jam buka, dan tarif malam harus di antaranya. Sementara itu halaman pelanggan memakai nilai yang disesuaikan.' }));
+    Array.prototype.push.apply(settingFields, [
+      H('Harga per jam (Rp)'),
+      N('priceWeekdayDay', 'Senin–Jumat, pagi sampai sebelum tarif malam', ''),
+      N('priceWeekdayNight', 'Senin–Jumat, malam', ''),
+      N('priceWeekendDay', 'Sabtu–Minggu, pagi sampai sebelum tarif malam', ''),
+      N('priceWeekendNight', 'Sabtu–Minggu, malam', ''),
+      H('DP dan pembayaran'),
+      N('dpWeekday', 'DP minimum Senin–Jumat (Rp)', ''),
+      N('dpWeekend', 'DP minimum Sabtu–Minggu (Rp)', ''),
+      N('holdMinutes', 'Waktu tahan jam sebelum bayar (menit)', 'Jam dilepas lagi kalau bukti transfer belum dikirim sampai batas ini.'),
+      H('Lapangan'),
+      C(0, 'name', 'Nama lapangan 1', ''),
+      C(0, 'type', 'Jenis lapangan 1 (opsional)', 'Contoh: Rumput sintetis atau Vinyl.'),
+      C(1, 'name', 'Nama lapangan 2', ''),
+      C(1, 'type', 'Jenis lapangan 2 (opsional)', ''),
+      C(2, 'name', 'Nama lapangan 3', ''),
+      C(2, 'type', 'Jenis lapangan 3 (opsional)', ''),
+      H('Fasilitas dan ketentuan'),
+      A('facilities', 'Fasilitas (satu per baris)', 'Kosongkan kalau tidak ingin menampilkan bagian Fasilitas.'),
+      A('policy', 'Ketentuan pembatalan', 'Tampil di tiket booking dan bagian Harga. Kosongkan kalau tidak perlu.'),
+      H('Notifikasi Telegram (di HP admin)'),
+      T('telegramToken', 'Token bot Telegram', 'Buka Telegram, cari @BotFather, kirim /newbot, ikuti langkahnya, lalu tempel token yang diberikan di sini.', 'text'),
+      T('telegramChatId', 'ID chat Telegram', 'Kirim pesan apa saja ke bot Anda, lalu buka bot @userinfobot untuk melihat ID Anda. Tempel angkanya di sini. Setelah itu tekan Kirim tes di sebelah kanan.', 'text'),
+    ]);
+    const photoEdits = [{ label: 'Foto latar bagian atas (hero)', target: 'hero', photo: raw.heroPhoto || '' }]
+      .concat([0, 1, 2].map((i) => ({ label: 'Foto ' + cname(i), target: i, photo: raw.courts[i].photo || '' })))
+      .map((p, idx) => ({
+        label: p.label,
+        photo: p.photo,
+        hasPhoto: !!p.photo,
+        noPhoto: !p.photo,
+        inputId: 'foto-' + idx,
+        upload: (e) => this.uploadPhoto(e, p.target),
+        remove: () => this.removePhoto(p.target),
+      }));
+
+    // ---- tab scan QR ----
+    const scBlank = { has: false, noMatch: false, code: '', badgeLabel: '', badgeCss: '', name: '', phone: '', court: '', dateLong: '', timeText: '', totalText: '', paidText: '', paidPct: '', remainLabel: '', remainText: '', remainBig: false, sourceNote: '', warnings: [], hasWarnings: false, hasDetail: false, canPay: false, markPaid: () => {}, canOpen: false, openIt: () => {} };
+    let sc = scBlank;
+    if (S.scanRes) {
+      const sr = S.scanRes;
+      const rec = calc.find((b) => b.code === sr.code);
+      const warn = [];
+      if (rec) {
+        const live = rec.st === 'ok' || rec.st === 'verify' || rec.st === 'wait';
+        const remain = rec.st === 'ok' ? rec.finRemain : rec.st === 'verify' ? Math.max(0, rec.total - rec.dpPaid) : rec.total;
+        const paidNow = rec.st === 'ok' ? rec.total - rec.finRemain : rec.st === 'verify' ? rec.dpPaid : 0;
+        let badgeLabel = 'Terkonfirmasi';
+        let badgeCss = GREEN;
+        if (rec.st === 'verify') { badgeLabel = 'Menunggu verifikasi'; badgeCss = YELLOW; warn.push('DP belum diverifikasi. Cek bukti transfer di tab Booking sebelum mengizinkan main.'); }
+        else if (rec.st === 'wait') { badgeLabel = 'Belum bayar DP'; badgeCss = RED; warn.push('Pelanggan belum mengirim bukti transfer DP.'); }
+        else if (rec.st === 'cancel') { badgeLabel = 'Dibatalkan'; badgeCss = RED; warn.push('Booking ini sudah dibatalkan dan tidak berlaku.'); }
+        else if (rec.st === 'rej') { badgeLabel = 'Bukti ditolak'; badgeCss = RED; warn.push('Bukti transfer ditolak, booking tidak berlaku.'); }
+        else if (rec.st === 'expired') { badgeLabel = 'Kedaluwarsa'; badgeCss = RED; warn.push('Batas waktu pembayaran sudah lewat, booking tidak berlaku.'); }
+        if (live && rec.date !== todayKey) warn.push('Jadwal booking ini bukan hari ini: ' + rec.dateLong + '.');
+        sc = Object.assign({}, scBlank, {
+          has: true,
+          hasDetail: true,
+          code: rec.code,
+          badgeLabel: badgeLabel,
+          badgeCss: badgeCss,
+          name: rec.name,
+          phone: rec.phoneText,
+          court: rec.court,
+          dateLong: rec.dateLong,
+          timeText: rec.timeText,
+          totalText: fmt(rec.total),
+          paidText: live ? fmt(paidNow) : '–',
+          paidPct: live && rec.total > 0 ? Math.round((paidNow / rec.total) * 100) + '% dari total' : '',
+          remainLabel: live && remain > 0 ? 'Sisa bayar di lokasi' : 'Sisa pembayaran',
+          remainText: !live ? '–' : remain > 0 ? fmt(remain) : 'Lunas, tidak ada sisa',
+          remainBig: live && remain > 0,
+          sourceNote: 'Data dari booking di perangkat admin ini (status terbaru).',
+          warnings: warn.map((x) => ({ text: x })),
+          hasWarnings: warn.length > 0,
+          canPay: rec.st === 'ok' && rec.finRemain > 0,
+          markPaid: () => this.setRestPaid(rec.id, true),
+          canOpen: true,
+          openIt: () => this.openBooking(rec.id),
+        });
+      } else if (sr.detail) {
+        const dd = sr.detail;
+        const remain = Math.max(0, dd.total - dd.paid);
+        warn.push('Booking ini tidak ada di data admin pada perangkat ini, jadi status pembayaran tidak bisa dipastikan. Data di bawah diambil dari isi QR.');
+        if (dd.date !== todayKey) warn.push('Jadwal booking ini bukan hari ini: ' + this.dateLongOf(dd.date) + '.');
+        sc = Object.assign({}, scBlank, {
+          has: true,
+          hasDetail: true,
+          code: sr.code,
+          badgeLabel: 'Dari isi QR',
+          badgeCss: YELLOW,
+          name: dd.name,
+          phone: this.fmtPhone(dd.phone),
+          court: cname(dd.court),
+          dateLong: this.dateLongOf(dd.date),
+          timeText: this.rangesText(dd.hours),
+          totalText: fmt(dd.total),
+          paidText: fmt(dd.paid),
+          paidPct: dd.total > 0 ? Math.round((dd.paid / dd.total) * 100) + '% dari total' : '',
+          remainLabel: remain > 0 ? 'Sisa bayar di lokasi' : 'Sisa pembayaran',
+          remainText: remain > 0 ? fmt(remain) : 'Lunas, tidak ada sisa',
+          remainBig: remain > 0,
+          sourceNote: 'Data dari isi QR saat DP dikirim.',
+          warnings: warn.map((x) => ({ text: x })),
+          hasWarnings: true,
+        });
+      } else {
+        sc = Object.assign({}, scBlank, { has: true, noMatch: true, code: sr.code, badgeLabel: 'Tidak ditemukan', badgeCss: RED, sourceNote: 'QR hanya berisi kode booking, dan kode ini tidak ada di data admin pada perangkat ini.' });
+      }
+    }
+
+    // ---- tab laporan keuangan ----
+    const curMonth = todayKey.slice(0, 7);
+    const rm = S.reportMonth || curMonth;
+    const recs = this.reportRecords(d, nowMs);
+    const monthRecs = recs.filter((r) => r.month === rm);
+    const sumOf = (arr, k) => arr.reduce((t, r) => t + r[k], 0);
+    const okRecs = monthRecs.filter((r) => r.st === 'ok');
+    const monthCount = {};
+    recs.forEach((r) => { monthCount[r.month] = (monthCount[r.month] || 0) + 1; });
+    if (monthCount[curMonth] === undefined) monthCount[curMonth] = 0;
+    if (monthCount[rm] === undefined) monthCount[rm] = 0;
+    const monthChips = Object.keys(monthCount).sort().reverse().map((m) => {
+      const on = m === rm;
+      return { label: this.monthLabel(m), count: monthCount[m], pressed: on, css: on ? ON_DARK : OFF_LIGHT, pick: () => this.setState({ reportMonth: m, exportMsg: '' }) };
+    });
+    const courtStats = [0, 1, 2].map((ci) => {
+      const cr = monthRecs.filter((r) => r.courtIdx === ci);
+      const cok = cr.filter((r) => r.st === 'ok');
+      return { name: cname(ci), bookings: String(cok.length), hours: String(sumOf(cok, 'durasi')), incomeText: fmt(sumOf(cr, 'income')) };
+    });
+    const repRows = monthRecs.map((r) => {
+      const dt = this.parseKey(r.date);
+      let badge = GREY;
+      if (r.st === 'ok') badge = r.remain === 0 ? GREEN : YELLOW;
+      else if (r.dpDecision === 'pending') badge = RED;
+      return {
+        dateText: dayShort[dt.getDay()] + ', ' + dt.getDate() + ' ' + monthShort[dt.getMonth()],
+        name: r.name,
+        code: r.code,
+        court: r.court,
+        timeText: this.rangesText(r.hours),
+        totalText: fmt(r.total),
+        incomeText: fmt(r.income),
+        splitText: r.income > 0 ? 'DP ' + fmt(r.dpIn) + (r.restIn > 0 ? ' + lunas ' + fmt(r.restIn) : '') : 'Belum ada',
+        statusLabel: r.label,
+        badgeCss: badge,
+        note: r.note + (r.st === 'ok' && r.remain > 0 ? ' ' + fmt(r.remain) : ''),
+        canPay: r.st === 'ok' && r.remain > 0,
+        pay: () => this.setRestPaid(r.id, true),
+        open: () => this.openBooking(r.id),
+      };
+    });
+    const nCancel = monthRecs.filter((r) => r.st === 'cancel').length;
+    const pendingDp = sumOf(monthRecs.filter((r) => r.st === 'verify'), 'paidDp');
+    const factParts = [okRecs.length + ' booking terkonfirmasi', sumOf(okRecs, 'durasi') + ' jam bermain'];
+    if (nCancel) factParts.push(nCancel + ' booking dibatalkan setelah DP');
+    if (pendingDp) factParts.push('DP ' + fmt(pendingDp) + ' menunggu verifikasi (belum dihitung)');
+
+    // ---- judul halaman per tab ----
+    const todayText = dayLong[now.getDay()] + ', ' + now.getDate() + ' ' + monthLong[now.getMonth()] + ' ' + now.getFullYear();
+    let pageTitle = 'Booking masuk';
+    let pageSub = todayText;
+    if (view === 'jadwal') { pageTitle = 'Jadwal lapangan'; pageSub = this.dateLongOf(dayKey); }
+    if (view === 'riwayat') { pageTitle = 'Riwayat booking'; pageSub = 'Booking yang sudah lewat, dibatalkan, ditolak, atau kedaluwarsa.'; }
+    if (view === 'scan') { pageTitle = 'Scan QR'; pageSub = 'Pindai QR tiket pelanggan untuk melihat detail booking dan sisa pembayaran.'; }
+    if (view === 'laporan') { pageTitle = 'Laporan keuangan'; pageSub = 'Pemasukan dan riwayat transaksi per bulan. Bulan baru mulai dari kosong, bulan sebelumnya tetap tersimpan.'; }
+    if (view === 'pengaturan') { pageTitle = 'Pengaturan'; pageSub = 'Ganti foto, data usaha, harga, dan ketentuan yang tampil di halaman pelanggan.'; }
+
+    return {
+      accent: accent,
+      brandName: brandName,
+      navItems: navItems,
+      pageTitle: pageTitle,
+      pageSub: pageSub,
+      showBooking: view === 'booking',
+      showJadwal: view === 'jadwal',
+      showRiwayat: view === 'riwayat',
+      showScan: view === 'scan',
+      showLaporan: view === 'laporan',
+      showPengaturan: view === 'pengaturan',
+
+      notifOpen: S.notifOpen,
+      hasUnread: unseen.length > 0,
+      unreadCount: unseen.length,
+      noNotifs: unseen.length === 0,
+      bellLabel: unseen.length > 0 ? 'Notifikasi, ' + unseen.length + ' belum dibaca' : 'Notifikasi',
+      notifLeft: S.notifLeft, notifTop: S.notifTop, notifW: S.notifW,
+      toggleNotif: (e) => {
+        if (S.notifOpen) { this.setState({ notifOpen: false }); return; }
+        const el = e && e.currentTarget;
+        const vw = document.documentElement.clientWidth || 360;
+        const w = Math.min(380, vw - 32);
+        let left = 16, top = 80;
+        if (el && el.getBoundingClientRect) { const r = el.getBoundingClientRect(); left = Math.max(16, Math.min(r.right - w, vw - w - 16)); top = r.bottom + 10; }
+        this.setState({ notifOpen: true, notifLeft: left, notifTop: top, notifW: w });
+      },
+      readAll: () => this.mutate((dd) => { dd.bookings.forEach((b) => { b.unseen = false; }); }),
+      notifs: notifs,
+      showBanner: S.bannerOpen && unseen.length > 0,
+      bannerTitle: top ? (top.st === 'cancel' ? 'Booking dibatalkan' : 'Transfer baru masuk') : '',
+      bannerText: top ? (top.st === 'cancel' ? top.name + ' membatalkan ' : top.name + ' mengirim bukti transfer ' + fmt(top.dpPaid) + ' · ') + top.court + ', ' + top.dateText + ' ' + top.timeText : '',
+      viewBanner: () => { if (top) this.openBooking(top.id); },
+      closeBanner: () => this.setState({ bannerOpen: false }),
+
+      statActive: String(active.length),
+      statVerify: String(countAct('verify')),
+      statWait: String(countAct('wait')),
+      statDp: fmt(active.filter((b) => b.st === 'ok').reduce((t, b) => t + b.dpPaid, 0)),
+      tabs: tabs,
+      query: S.query,
+      onQuery: (e) => this.setState({ query: e && e.target ? e.target.value : '' }),
+      rows: rows,
+      noRows: rows.length === 0,
+      emptyText: active.length === 0
+        ? 'Belum ada booking aktif. Booking baru dari pelanggan akan muncul di sini, lengkap dengan notifikasi saat bukti transfer masuk.'
+        : 'Tidak ada booking yang cocok dengan filter atau pencarian ini.',
+      cur: cur,
+      hasSel: !!curFound,
+      noSel: !curFound,
+      verify: () => this.setStatus('ok'),
+      reject: () => this.setStatus('rej'),
+      askingCancel: S.confirmCancel,
+      notAskingCancel: !S.confirmCancel,
+      askCancel: () => this.setState({ confirmCancel: true }),
+      keepBooking: () => this.setState({ confirmCancel: false }),
+      doCancel: () => this.cancelBooking(),
+
+      days: days,
+      dateLong: this.dateLongOf(dayKey),
+      courtName0: cname(0),
+      courtName1: cname(1),
+      courtName2: cname(2),
+      cells: cells,
+      jBooked: String(nBooked),
+      jPending: String(nPending),
+      jBlocked: String(nBlocked),
+      jFree: String(nFree),
+      dNone: !S.selKey,
+      hasDet: !!S.selKey,
+      dTitle: dTitle,
+      dBooked: !!selBooking,
+      dFree: dFreeFlag,
+      dBlocked: dBlockedFlag,
+      sdName: selBooking ? selBooking.name : '',
+      sdCode: selBooking ? selBooking.code : '',
+      sdStatus: selBooking ? selBooking.statusLabel : '',
+      sdBadgeCss: selBooking ? selBooking.badgeCss : '',
+      sdRange: selBooking ? selBooking.timeText : '',
+      sdTotal: selBooking ? selBooking.totalText : '',
+      sdDp: selBooking ? selBooking.dpLine : '',
+      openSlotBooking: () => { if (selBooking) this.openBooking(selBooking.id); },
+      toggleBlock: () => {
+        const k = dayKey + '|' + S.selKey.split('-')[0] + '|' + S.selKey.split('-')[1];
+        this.mutate((dd) => { if (dd.blocked[k]) delete dd.blocked[k]; else dd.blocked[k] = true; });
+      },
+
+      hDone: String(hCount('done')),
+      hLost: String(hCount('cancel') + hCount('rej') + hCount('expired')),
+      hPaid: fmt(history.filter((b) => b.kind === 'done').reduce((t, b) => t + b.income, 0)),
+      htabs: htabs,
+      hquery: S.hquery,
+      onHQuery: (e) => this.setState({ hquery: e && e.target ? e.target.value : '' }),
+      hrows: hrows,
+      hNoRows: hrows.length === 0,
+      hEmptyText: history.length === 0
+        ? 'Belum ada riwayat. Booking yang sudah lewat, dibatalkan, ditolak, atau kedaluwarsa akan muncul di sini.'
+        : 'Tidak ada riwayat yang cocok dengan filter atau pencarian ini.',
+
+      scanning: S.scanning,
+      notScanning: !S.scanning,
+      hasScanMsg: !!S.scanMsg,
+      scanMsg: S.scanMsg,
+      scanInput: S.scanInput,
+      onScanInput: (e) => this.setState({ scanInput: e && e.target ? e.target.value : '' }),
+      doScanLookup: () => {
+        const q = String(this.state.scanInput || '').trim();
+        if (!q) { this.setState({ scanMsg: 'Ketik kode booking dulu, contoh GA-4F7K2.' }); return; }
+        this.handleScanText(q);
+      },
+      onScanFile: (e) => this.scanFile(e),
+      startScan: () => this.startScan(),
+      closeCamera: () => this.stopCamera(),
+      scanAgain: () => this.setState({ scanRes: null, scanMsg: '' }),
+      noScan: !sc.has,
+      sc: sc,
+      monthTitle: this.monthLabel(rm),
+      notThisMonth: rm !== curMonth,
+      prevMonth: () => this.setState({ reportMonth: this.shiftMonth(rm, -1), exportMsg: '' }),
+      nextMonth: () => this.setState({ reportMonth: this.shiftMonth(rm, 1), exportMsg: '' }),
+      thisMonth: () => this.setState({ reportMonth: '', exportMsg: '' }),
+      monthChips: monthChips,
+      repIncome: fmt(sumOf(monthRecs, 'income')),
+      repDp: fmt(sumOf(monthRecs, 'dpIn')),
+      repRest: fmt(sumOf(monthRecs, 'restIn')),
+      repRemain: fmt(sumOf(monthRecs, 'remain')),
+      factLine: factParts.join(' · '),
+      courtStats: courtStats,
+      repRows: repRows,
+      repNoRows: repRows.length === 0,
+      repEmptyText: recs.length === 0
+        ? 'Belum ada transaksi. Booking yang DP-nya diverifikasi akan tercatat di sini.'
+        : 'Belum ada transaksi di ' + this.monthLabel(rm) + '. Bulan ini mulai dari kosong, data bulan lain tetap tersimpan.',
+      exportMonth: () => this.exportXlsx('month'),
+      exportAll: () => this.exportXlsx('all'),
+      hasExportMsg: !!S.exportMsg,
+      exportMsg: S.exportMsg,
+      settingFields: settingFields,
+      photoEdits: photoEdits,
+      hasPhotoMsg: !!S.photoMsg,
+      photoMsg: S.photoMsg,
+      storageNote: S.storeOk
+        ? 'Terhubung ke server. Booking dari HP pelanggan masuk otomatis dan semua data tersimpan online.'
+        : 'Tidak terhubung ke server. Perubahan belum tersimpan. Periksa internet lalu muat ulang halaman.',
+      hasSyncMsg: !!S.syncMsg,
+      syncMsg: S.syncMsg,
+      testNotify: () => this.testNotify(),
+      enableBrowserNotif: () => this.enableBrowserNotif(),
+      browserNotifLabel: S.notifPerm === 'granted' ? 'Notifikasi browser aktif (tes bunyi)' : 'Aktifkan notifikasi browser dan bunyi',
+      hasNotifyMsg: !!S.notifyMsg,
+      notifyMsg: S.notifyMsg,
+      confirmBookings: S.confirmReset === 'bookings',
+      notConfirmBookings: S.confirmReset !== 'bookings',
+      confirmSettings: S.confirmReset === 'settings',
+      notConfirmSettings: S.confirmReset !== 'settings',
+      askResetBookings: () => this.setState({ confirmReset: 'bookings' }),
+      askResetSettings: () => this.setState({ confirmReset: 'settings' }),
+      cancelReset: () => this.setState({ confirmReset: '' }),
+      doResetBookings: () => { this.mutate((dd) => { dd.bookings = []; dd.blocked = {}; }); this.setState({ confirmReset: '', sel: '', selKey: '' }); },
+      doResetSettings: () => { this.mutate((dd) => { const keep = { telegramToken: dd.settings.telegramToken, telegramChatId: dd.settings.telegramChatId }; dd.settings = Object.assign(this.defaults().settings, keep); }); this.setState({ confirmReset: '' }); },
+    };
+  }
+}
+</script>
+</body>
+</html>
