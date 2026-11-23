@@ -1,6 +1,0 @@
-/* tema: Midnight Emerald Glass (midnight-emerald) - dibuat oleh scripts/build-theme.mjs */
-:root{--accent:#1F6B45;--fill:#C9F23C;--onacc:#0C2B20;--bg:#F5F3EC;--bg2:#FFFFFF;--ring:#F5F3EC;--glass:#FFFFFF;--glass2:#F5F3EC;--line:#E3E0D5;--line2:#8A968D;--tx:#10261C;--tx2:#3F5247;--tx3:#6B786F;--dk:#0C2B20;--dk2:#133A2B;--dk0:#06160F;--ov:5,18,12;--dim:#E4E1D8;--btn:#0C2B20;--btnfg:#C9F23C;--btnbd:#0C2B20;--pill:#0C2B20;--pillbd:#0C2B20;--err-tx:#8A1F15;--err-bg:#FAD4D0;--warn-tx:#4F3A00;--warn-bg:#FFE9A8;--ok-tx:#0F4A2A;--ok-bg:#CDEFD9;--err-solid:#8A1F15;color-scheme:light}
-header,.hero,#harga,#kontak{--tx:#F3F5EE;--tx2:#C3D2C8;--tx3:#A9BDB1;--accent:#C9F23C;--line:#2A5C46;--line2:#5E8C75}
-a[style*='color:var(--accent)']{text-underline-offset:3px}
-[style*='background:var(--fill)']{--accent:var(--onacc);--tx:var(--onacc);--tx2:color-mix(in srgb,var(--onacc) 82%,transparent);--tx3:color-mix(in srgb,var(--onacc) 62%,transparent);--ok-tx:var(--onacc);--err-tx:var(--onacc);--warn-tx:var(--onacc)}
-[style*='background:var(--fill)']{--accent:var(--onacc);--tx:var(--onacc);--tx2:color-mix(in srgb,var(--onacc) 82%,transparent);--tx3:color-mix(in srgb,var(--onacc) 62%,transparent);--ok-tx:var(--onacc);--err-tx:var(--onacc);--warn-tx:var(--onacc)}
